@@ -423,15 +423,31 @@ button { font-family: inherit; cursor: pointer; }
 /* ====================== TABBAR ====================== */
 .tabbar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
-  display: flex; justify-content: space-around;
-  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
-  background: rgba(7, 11, 22, 0.9); backdrop-filter: blur(14px);
+  display: flex; justify-content: space-around; align-items: flex-end;
+  padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+  background: rgba(7, 11, 22, 0.92); backdrop-filter: blur(14px);
   border-top: 1px solid var(--line);
 }
 .tab { display: flex; flex-direction: column; align-items: center; gap: 3px;
-  background: none; border: none; color: var(--text-faint); font-size: 11px; padding: 4px 14px; }
-.tab__icon { font-size: 19px; line-height: 1; }
-.tab.is-active { color: var(--neon); text-shadow: var(--glow); }
+  background: none; border: none; color: var(--text-dim); font-size: 11px; padding: 4px 10px; }
+.tab__icon { font-size: 22px; line-height: 1; }
+.tab__txt { font-size: 11px; }
+.tab.is-active { color: var(--neon); }
+.tab.is-active .tab__icon { filter: drop-shadow(0 0 6px rgba(40,224,255,.5)); }
+
+/* botão central destacado "Lançar" */
+.tab--fab { color: var(--neon); }
+.tab--fab .tab__fab {
+  display: flex; align-items: center; justify-content: center;
+  width: 56px; height: 56px; margin-top: -28px; margin-bottom: 1px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--neon), var(--neon-2));
+  color: #04111f; font-size: 34px; font-weight: 300; line-height: 1;
+  border: 4px solid var(--bg);
+  box-shadow: var(--glow), 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+.tab--fab .tab__txt { color: var(--neon); font-weight: 700; }
+.tab--fab:active .tab__fab { transform: scale(0.93); filter: brightness(1.08); }
 
 /* ====================== TOAST + MODAL ====================== */
 .toast {

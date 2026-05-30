@@ -759,6 +759,7 @@
     toast(`Semana ${idx + 1} lançada ✓`);
   }
   $('#start-wizard').addEventListener('click', openWizard);
+  $('#tab-lancar').addEventListener('click', openWizard);   // botão central abre o guia direto
   $('#wiz-next').addEventListener('click', wizNext);
   $('#wiz-back').addEventListener('click', wizBack);
   $('#wiz-close').addEventListener('click', wizClose);
