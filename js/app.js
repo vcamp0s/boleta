@@ -166,8 +166,8 @@
   function askUnitSetup() {
     openModal({
       title: 'Bem-vindo(a) à Boleta 👋',
-      msg: 'De qual unidade você é responsável agora? Você pode mudar depois em Configurações.',
-      withField: true, value: Store.getUnit(), okText: 'Começar'
+      msg: 'De qual unidade você é responsável? Você pode mudar ou definir depois em Configurações.',
+      withField: true, value: '', placeholder: 'Nome da sua unidade', okText: 'Começar'
     });
     modalOk = raw => {
       const v = (raw || '').trim();
@@ -762,13 +762,14 @@
      ================================================================= */
   const modal = $('#modal');
   let modalOk = null;
-  function openModal({ title, msg, withField, value, okText }) {
+  function openModal({ title, msg, withField, value, okText, placeholder }) {
     $('#modal-title').textContent = title;
     $('#modal-msg').textContent = msg || '';
     $('#modal-msg').classList.toggle('hidden', !msg);
     $('#modal-field-wrap').classList.toggle('hidden', !withField);
     $('#modal-ok').textContent = okText || 'Confirmar';
     const input = $('#modal-input');
+    input.placeholder = placeholder || '';
     if (withField) { input.value = value || ''; setTimeout(() => input.focus(), 50); }
     modal.classList.remove('hidden');
   }

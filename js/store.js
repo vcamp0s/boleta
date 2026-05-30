@@ -14,7 +14,7 @@ const Store = (() => {
 
   const empty = () => ({
     pinHash: null,
-    unit: 'Assunção - SBC',
+    unit: '',
     fixedExpenses: [],
     variable: {},
     income: {}
