@@ -183,6 +183,12 @@
       toast('Unidade atualizada');
     });
   });
+  $('#show-welcome').addEventListener('click', () => {
+    askUnitSetup();
+    // após confirmar/cancelar, mantém a tela de Config em dia
+    const prev = modalOk;
+    modalOk = raw => { prev(raw); renderConfig(); };
+  });
 
   /* =================================================================
      NAVEGAÇÃO ENTRE MESES E VIEWS
