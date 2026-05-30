@@ -69,6 +69,7 @@
       }
       Store.setPin(pinBuffer);
       unlock();
+      askUnitSetup();          // primeiro acesso: define a unidade
     } else {
       if (Store.checkPin(pinBuffer)) { unlock(); }
       else { pinBuffer = ''; renderDots(); pinError('PIN incorreto.'); }
@@ -162,6 +163,18 @@
 
   /* ---------------- UNIDADE ---------------- */
   function renderUnit() { $('#topbar-unit').textContent = Store.getUnit(); }
+  function askUnitSetup() {
+    openModal({
+      title: 'Bem-vindo(a) à Boleta 👋',
+      msg: 'De qual unidade você é responsável agora? Você pode mudar depois em Configurações.',
+      withField: true, value: Store.getUnit(), okText: 'Começar'
+    });
+    modalOk = raw => {
+      const v = (raw || '').trim();
+      if (v) Store.setUnit(v);
+      closeModal(); renderUnit();
+    };
+  }
   function renderConfig() { $('#config-unit').textContent = Store.getUnit() || '(sem unidade definida)'; }
   $('#edit-unit').addEventListener('click', () => {
     promptText('Unidade responsável', 'Nome que aparece no topo do app e nos resumos.', Store.getUnit(), v => {
@@ -641,6 +654,108 @@
         renderAll(); toast('Backup restaurado ✓');
       }, 'Restaurar');
   }
+
+  /* =================================================================
+     ASSISTENTE DE LANÇAMENTO GUIADO (wizard)
+     ================================================================= */
+  let wiz = null;   // { weeks, mKey, weekIdx, principal, patrocinadores, step }
+
+  function openWizard() {
+    const weeks = U.weeksOfMonth(cur.year, cur.month);
+    const mKey = U.monthKey(cur.year, cur.month);
+    const todayIso = U.iso(new Date());
+    let weekIdx = weeks.findIndex(w => w.key <= todayIso && todayIso <= U.iso(w.end));
+    if (weekIdx < 0) weekIdx = 0;
+    const inc = Store.getIncome(mKey, weeks[weekIdx].key);
+    wiz = { weeks, mKey, weekIdx, principal: inc.principal || 0, patrocinadores: inc.patrocinadores || 0, step: 1 };
+    $('#wizard').classList.remove('hidden');
+    wizRender();
+  }
+  function wizClose() { $('#wizard').classList.add('hidden'); wiz = null; }
+
+  function wizLoadWeek() {
+    const inc = Store.getIncome(wiz.mKey, wiz.weeks[wiz.weekIdx].key);
+    wiz.principal = inc.principal || 0;
+    wiz.patrocinadores = inc.patrocinadores || 0;
+  }
+
+  function wizRender() {
+    const { step, weeks, weekIdx } = wiz;
+    const w = weeks[weekIdx];
+    const periodo = `Semana ${weekIdx + 1} · ${U.ddmm(w.start)}–${U.ddmm(w.end)}`;
+    $('#wiz-steps').innerHTML = [1, 2, 3, 4].map(n =>
+      `<span class="wiz-dot ${n === step ? 'is-on' : ''} ${n < step ? 'is-done' : ''}"></span>`).join('');
+    $('#wiz-back').style.visibility = step === 1 ? 'hidden' : 'visible';
+    const next = $('#wiz-next'), body = $('#wiz-body');
+
+    if (step === 1) {
+      $('#wiz-title').textContent = 'Qual semana?';
+      $('#wiz-sub').textContent = U.monthLabel(cur.year, cur.month);
+      next.textContent = 'Próximo';
+      const todayIso = U.iso(new Date());
+      body.innerHTML = weeks.map((ww, i) => {
+        const atual = ww.key <= todayIso && todayIso <= U.iso(ww.end);
+        return `<button class="wiz-week ${i === weekIdx ? 'is-sel' : ''}" data-i="${i}">
+          <span class="wiz-week__name">Semana ${i + 1}${atual ? ' <span class="picker-item__tag">atual</span>' : ''}</span>
+          <span class="picker-item__sub">${U.ddmm(ww.start)}–${U.ddmm(ww.end)}</span>
+        </button>`;
+      }).join('');
+      $$('#wiz-body .wiz-week').forEach(b => b.addEventListener('click', () => {
+        wiz.weekIdx = Number(b.dataset.i); wizLoadWeek(); wizRender();
+      }));
+    } else if (step === 2 || step === 3) {
+      const isPrinc = step === 2;
+      $('#wiz-title').textContent = isPrinc ? 'Boleta Principal' : 'Patrocinadores';
+      $('#wiz-sub').textContent = periodo;
+      next.textContent = 'Próximo';
+      const val = isPrinc ? wiz.principal : wiz.patrocinadores;
+      body.innerHTML = `<label class="wiz-field">
+        <span>Quanto entrou ${isPrinc ? 'na Boleta Principal' : 'de Patrocinadores'} nesta semana?</span>
+        <div class="wiz-money"><span>R$</span>
+          <input class="input wiz-input" id="wiz-val" inputmode="decimal" placeholder="0,00"
+            value="${val ? U.numBR(val) : ''}" /></div>
+      </label>`;
+      const inp = $('#wiz-val');
+      setTimeout(() => { inp.focus(); inp.select(); }, 60);
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); wizNext(); } });
+    } else {
+      $('#wiz-title').textContent = 'Confirmar';
+      $('#wiz-sub').textContent = periodo;
+      next.textContent = '✓ Salvar';
+      const total = wiz.principal + wiz.patrocinadores;
+      body.innerHTML = `<div class="wiz-summary">
+        <div class="wiz-srow"><span>Boleta Principal</span><b>${U.moneyBR(wiz.principal)}</b></div>
+        <div class="wiz-srow"><span>Patrocinadores</span><b>${U.moneyBR(wiz.patrocinadores)}</b></div>
+        <div class="wiz-srow wiz-srow--total"><span>Total da semana</span><b class="pos">${U.moneyBR(total)}</b></div>
+      </div>`;
+    }
+  }
+
+  function wizCaptureInput() {
+    if (wiz.step === 2) wiz.principal = U.parseNum($('#wiz-val').value);
+    if (wiz.step === 3) wiz.patrocinadores = U.parseNum($('#wiz-val').value);
+  }
+  function wizNext() {
+    wizCaptureInput();
+    if (wiz.step < 4) { wiz.step++; wizRender(); } else wizSave();
+  }
+  function wizBack() {
+    wizCaptureInput();
+    if (wiz.step > 1) { wiz.step--; wizRender(); }
+  }
+  function wizSave() {
+    const idx = wiz.weekIdx, w = wiz.weeks[idx];
+    Store.setIncome(wiz.mKey, w.key, 'principal', wiz.principal);
+    Store.setIncome(wiz.mKey, w.key, 'patrocinadores', wiz.patrocinadores);
+    wizClose();
+    renderEntradas();
+    if (activeView === 'resumo') renderResumo();
+    toast(`Semana ${idx + 1} lançada ✓`);
+  }
+  $('#start-wizard').addEventListener('click', openWizard);
+  $('#wiz-next').addEventListener('click', wizNext);
+  $('#wiz-back').addEventListener('click', wizBack);
+  $('#wiz-close').addEventListener('click', wizClose);
 
   /* =================================================================
      MODAL / TOAST / HELPERS

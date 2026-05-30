@@ -93,7 +93,8 @@
 
       <!-- ---------- ENTRADAS ---------- -->
       <section class="view hidden" id="view-entradas">
-        <p class="view-intro">Lançamentos semanais (segunda a domingo).</p>
+        <button class="btn btn--neon btn--block wiz-start" id="start-wizard">✨ Lançamento guiado da semana</button>
+        <p class="view-intro">Ou edite direto abaixo. Lançamentos semanais (segunda a domingo).</p>
         <div id="weeks-list"></div>
       </section>
 
@@ -255,6 +256,21 @@
         <button class="key key--ghost" data-key="reset" title="Apagar tudo">↺</button>
         <button class="key" data-key="0">0</button>
         <button class="key key--ghost" data-key="back" title="Apagar">⌫</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================== ASSISTENTE DE LANÇAMENTO GUIADO ====================== -->
+  <div class="wizard hidden" id="wizard">
+    <div class="wizard__box">
+      <button class="wizard__close" id="wiz-close" aria-label="Fechar">✕</button>
+      <div class="wizard__steps" id="wiz-steps"></div>
+      <h3 class="wizard__title" id="wiz-title"></h3>
+      <p class="wizard__sub" id="wiz-sub"></p>
+      <div class="wizard__body" id="wiz-body"></div>
+      <div class="wizard__nav">
+        <button class="btn btn--ghost" id="wiz-back">Voltar</button>
+        <button class="btn btn--neon" id="wiz-next">Próximo</button>
       </div>
     </div>
   </div>
