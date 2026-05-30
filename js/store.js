@@ -142,6 +142,32 @@ const Store = (() => {
     return [...set].sort();
   }
 
+  /** mês "ativo" = usuário lançou entrada ou conta variável (ignora só-fixas) */
+  function monthHasActivity(year, month) {
+    const mKey = U.monthKey(year, month);
+    return incomeTotals(mKey).total > 0 || variableTotal(mKey) > 0;
+  }
+
+  /** resumo do ano agregando apenas os meses com movimento */
+  function yearSummary(year) {
+    let entradas = 0, principal = 0, patrocinadores = 0, fixed = 0, variable = 0, meses = 0;
+    let melhor = null, pior = null;
+    for (let m = 0; m < 12; m++) {
+      if (!monthHasActivity(year, m)) continue;
+      const s = monthSummary(year, m);
+      entradas += s.entradas; principal += s.principal; patrocinadores += s.patrocinadores;
+      fixed += s.fixed; variable += s.variable; meses++;
+      if (!melhor || s.saldo > melhor.saldo) melhor = { month: m, saldo: s.saldo };
+      if (!pior  || s.saldo < pior.saldo)   pior   = { month: m, saldo: s.saldo };
+    }
+    const saidas = fixed + variable;
+    return {
+      entradas, principal, patrocinadores, fixed, variable, saidas,
+      saldo: entradas - saidas, meses, melhor, pior,
+      media: meses ? (entradas - saidas) / meses : 0
+    };
+  }
+
   /* ---------------- BACKUP / RESTAURAÇÃO ---------------- */
   /** monta o pacote de backup (sem o PIN — só dados financeiros) */
   function exportBundle() {
@@ -174,7 +200,7 @@ const Store = (() => {
     fixedList: () => state.fixedExpenses, fixedAmount, addFixed, setFixedAmount,
     renameFixed, removeFixed, applyAnnualAdjust, fixedTotal,
     getVariable, addVariable, setVariableAmount, removeVariable, variableTotal,
-    monthSummary, monthsWithData,
+    monthSummary, monthsWithData, monthHasActivity, yearSummary,
     exportBundle, importBundle
   };
 })();

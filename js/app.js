@@ -374,14 +374,16 @@
       histYear = Number(t.dataset.year); renderHistorico();
     }));
 
-    // saldo de cada mês do ano selecionado
+    renderYearSummary();
+
+    // saldo de cada mês com movimento no ano selecionado
     const rows = [];
     let maxAbs = 1;
     for (let m = 0; m < 12; m++) {
+      const has = Store.monthHasActivity(histYear, m);
       const s = Store.monthSummary(histYear, m);
-      const hasData = s.entradas !== 0 || s.saidas !== 0;
-      if (hasData) maxAbs = Math.max(maxAbs, Math.abs(s.saldo));
-      rows.push({ m, s, hasData });
+      if (has) maxAbs = Math.max(maxAbs, Math.abs(s.saldo));
+      rows.push({ m, s, hasData: has });
     }
 
     const list = $('#history-list');
@@ -404,8 +406,62 @@
     }).join('');
   }
 
+  /* ---------------- RESUMO ANUAL ---------------- */
+  function renderYearSummary() {
+    const ys = Store.yearSummary(histYear);
+    const wrap = $('#year-summary');
+    if (!ys.meses) {
+      wrap.className = 'ysum';
+      wrap.innerHTML = `<span class="ysum__label">Resultado de ${histYear}</span>
+        <div class="ysum__empty">Sem meses com movimento ainda. Lance entradas para acompanhar o ano.</div>`;
+      return;
+    }
+    const pos = ys.saldo >= 0;
+    wrap.className = 'ysum ' + (pos ? 'is-pos' : 'is-neg');
+    const melhor = ys.melhor ? `${U.MESES[ys.melhor.month]} · ${U.moneyBR(ys.melhor.saldo)}` : '—';
+    const pior   = ys.pior   ? `${U.MESES[ys.pior.month]} · ${U.moneyBR(ys.pior.saldo)}`   : '—';
+    const mesesTxt = ys.meses > 1 ? `${ys.meses} meses ativos` : '1 mês ativo';
+    wrap.innerHTML = `
+      <span class="ysum__label">Resultado de ${histYear}</span>
+      <span class="ysum__saldo">${U.moneyBR(ys.saldo)}</span>
+      <span class="ysum__meta">${mesesTxt} · média ${U.moneyBR(ys.media)}/mês</span>
+      ${yearChartHtml(histYear)}
+      <div class="ysum__grid">
+        <div class="ysum__cell"><span>Entradas no ano</span><b class="pos">${U.moneyBR(ys.entradas)}</b></div>
+        <div class="ysum__cell"><span>Saídas no ano</span><b class="neg">${U.moneyBR(ys.saidas)}</b></div>
+        <div class="ysum__cell"><span>Melhor mês</span><b><small>${melhor}</small></b></div>
+        <div class="ysum__cell"><span>Pior mês</span><b><small>${pior}</small></b></div>
+      </div>
+      <button class="btn btn--neon ysum__export" id="export-year">📲 Resumo do ano</button>`;
+    $('#export-year').addEventListener('click', () => copyOrShare(buildYearText(histYear), 'Resumo do ano'));
+  }
+
+  /** mini-gráfico de barras (12 meses) com linha de base no zero */
+  function yearChartHtml(year) {
+    const L = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+    const months = [];
+    let maxAbs = 1;
+    for (let m = 0; m < 12; m++) {
+      const has = Store.monthHasActivity(year, m);
+      const saldo = has ? Store.monthSummary(year, m).saldo : null;
+      if (has) maxAbs = Math.max(maxAbs, Math.abs(saldo));
+      months.push({ m, has, saldo });
+    }
+    const cols = months.map(({ m, has, saldo }) => {
+      const posH = has && saldo >= 0 ? Math.max(6, Math.round(saldo / maxAbs * 100)) : 0;
+      const negH = has && saldo < 0 ? Math.max(6, Math.round(-saldo / maxAbs * 100)) : 0;
+      const title = has ? `${U.MESES[m]}: ${U.moneyBR(saldo)}` : `${U.MESES[m]}: sem movimento`;
+      return `<div class="ychart__col${has ? '' : ' is-empty'}" title="${title}">
+        <div class="ychart__half ychart__half--pos"><i class="ychart__bar is-pos" style="height:${posH}%"></i></div>
+        <div class="ychart__half ychart__half--neg"><i class="ychart__bar is-neg" style="height:${negH}%"></i></div>
+        <span class="ychart__m">${L[m]}</span>
+      </div>`;
+    }).join('');
+    return `<div class="ychart">${cols}</div>`;
+  }
+
   /* =================================================================
-     EXPORTAR PARA WHATSAPP (semanal ou mensal)
+     EXPORTAR PARA WHATSAPP (semanal, mensal ou anual)
      ================================================================= */
   function buildMonthlyText() {
     const s = Store.monthSummary(cur.year, cur.month);
@@ -436,6 +492,26 @@
     txt += `*ENTRADAS DA SEMANA:* ${U.moneyBR(total)}\n`;
     txt += `  • Boleta Principal: ${U.moneyBR(inc.principal || 0)}\n`;
     txt += `  • Patrocinadores: ${U.moneyBR(inc.patrocinadores || 0)}`;
+    return txt;
+  }
+
+  function buildYearText(year) {
+    const ys = Store.yearSummary(year);
+    const sinal = ys.saldo >= 0 ? '🟢' : '🔴';
+    const mesesTxt = ys.meses > 1 ? `${ys.meses} meses ativos` : `${ys.meses} mês ativo`;
+    let txt = `*BOLETA · Ano ${year}*\n`;
+    txt += `━━━━━━━━━━━━━━\n`;
+    txt += `*ENTRADAS:* ${U.moneyBR(ys.entradas)}\n`;
+    txt += `  • Boleta Principal: ${U.moneyBR(ys.principal)}\n`;
+    txt += `  • Patrocinadores: ${U.moneyBR(ys.patrocinadores)}\n\n`;
+    txt += `*SAÍDAS:* ${U.moneyBR(ys.saidas)}\n`;
+    txt += `  • Fixas: ${U.moneyBR(ys.fixed)}\n`;
+    txt += `  • Variáveis: ${U.moneyBR(ys.variable)}\n`;
+    txt += `━━━━━━━━━━━━━━\n`;
+    txt += `${sinal} *SALDO DO ANO: ${U.moneyBR(ys.saldo)}*\n`;
+    txt += `${mesesTxt} · média ${U.moneyBR(ys.media)}/mês`;
+    if (ys.melhor) txt += `\nMelhor: ${U.MESES[ys.melhor.month]} (${U.moneyBR(ys.melhor.saldo)})`;
+    if (ys.pior)   txt += ` · Pior: ${U.MESES[ys.pior.month]} (${U.moneyBR(ys.pior.saldo)})`;
     return txt;
   }
 
