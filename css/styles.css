@@ -420,6 +420,36 @@ button { font-family: inherit; cursor: pointer; }
 .wiz-srow--total span { color: var(--text); font-weight: 600; }
 .wiz-srow b.pos { color: var(--pos); }
 
+/* ====================== TOUR "COMO USAR" (onboarding) ====================== */
+.onboard {
+  position: fixed; inset: 0; z-index: 90;
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  background:
+    radial-gradient(700px 360px at 80% -10%, rgba(47, 107, 255, 0.18), transparent 60%),
+    rgba(3, 6, 14, 0.93);
+  backdrop-filter: blur(8px);
+}
+.onboard__box {
+  position: relative; width: 100%; max-width: 380px; text-align: center;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 32px 24px 22px; box-shadow: var(--glow);
+}
+.onboard__skip { position: absolute; top: 12px; right: 14px; background: none; border: none;
+  color: var(--text-faint); font-size: 13px; }
+.onboard__art { font-size: 52px; line-height: 1; min-height: 88px;
+  display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px; }
+.onboard__logo { width: 86px; height: 86px; object-fit: contain; border-radius: 20px;
+  filter: drop-shadow(0 0 18px rgba(40, 224, 255, 0.45)); }
+.onboard__title { font-size: 21px; margin-bottom: 8px; }
+.onboard__text { color: var(--text-dim); font-size: 14.5px; line-height: 1.55; margin-bottom: 18px; }
+.onboard__text b { color: var(--text); font-weight: 700; }
+.onboard__field { margin-bottom: 16px; }
+.onboard__dots { display: flex; gap: 7px; justify-content: center; margin-bottom: 18px; }
+.ob-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--line); transition: .2s; }
+.ob-dot.is-on { width: 20px; border-radius: 4px; background: var(--neon); box-shadow: var(--glow); }
+.onboard__nav { display: flex; gap: 10px; }
+.onboard__nav .btn { flex: 1; }
+
 /* ====================== TABBAR ====================== */
 .tabbar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;

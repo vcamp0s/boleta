@@ -159,10 +159,10 @@
           </div>
           <div class="setting-row">
             <div>
-              <div class="setting-row__name">Tela de boas-vindas</div>
-              <div class="setting-row__sub">Rever a experiência do primeiro acesso</div>
+              <div class="setting-row__name">Como usar o app</div>
+              <div class="setting-row__sub">Rever o tour de boas-vindas</div>
             </div>
-            <button class="btn btn--small" id="show-welcome">Rever</button>
+            <button class="btn btn--small" id="show-welcome">Ver tour</button>
           </div>
         </div>
 
@@ -278,6 +278,24 @@
       <div class="wizard__nav">
         <button class="btn btn--ghost" id="wiz-back">Voltar</button>
         <button class="btn btn--neon" id="wiz-next">Próximo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================== TOUR "COMO USAR" (primeiro acesso) ====================== -->
+  <div class="onboard hidden" id="onboard">
+    <div class="onboard__box">
+      <button class="onboard__skip" id="ob-skip">Pular</button>
+      <div class="onboard__art" id="ob-art"></div>
+      <h2 class="onboard__title" id="ob-title"></h2>
+      <p class="onboard__text" id="ob-text"></p>
+      <div class="onboard__field hidden" id="ob-field">
+        <input class="input" id="ob-unit" placeholder="Nome da sua unidade" autocomplete="off" />
+      </div>
+      <div class="onboard__dots" id="ob-dots"></div>
+      <div class="onboard__nav">
+        <button class="btn btn--ghost" id="ob-back">Voltar</button>
+        <button class="btn btn--neon" id="ob-next">Próximo</button>
       </div>
     </div>
   </div>

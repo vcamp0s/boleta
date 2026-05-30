@@ -69,7 +69,7 @@
       }
       Store.setPin(pinBuffer);
       unlock();
-      askUnitSetup();          // primeiro acesso: define a unidade
+      openOnboarding();        // primeiro acesso: tour "como usar" + unidade
     } else {
       if (Store.checkPin(pinBuffer)) { unlock(); }
       else { pinBuffer = ''; renderDots(); pinError('PIN incorreto.'); }
@@ -163,18 +163,60 @@
 
   /* ---------------- UNIDADE ---------------- */
   function renderUnit() { $('#topbar-unit').textContent = Store.getUnit(); }
-  function askUnitSetup() {
-    openModal({
-      title: 'Bem-vindo(a) à Boleta 👋',
-      msg: 'De qual unidade você é responsável? Você pode mudar ou definir depois em Configurações.',
-      withField: true, value: '', placeholder: 'Nome da sua unidade', okText: 'Começar'
-    });
-    modalOk = raw => {
-      const v = (raw || '').trim();
-      if (v) Store.setUnit(v);
-      closeModal(); renderUnit();
-    };
+  /* ---------------- TOUR "COMO USAR" (primeiro acesso) ---------------- */
+  const OB_SLIDES = [
+    { art: '<img class="onboard__logo" src="icons/company.png" alt="">',
+      title: 'Bem-vindo(a) à Boleta',
+      text: 'Seu controle financeiro da semana — simples, rápido e guardado só no seu aparelho.' },
+    { art: '➕',
+      title: 'Lançar a semana',
+      text: 'Toque no botão azul <b>Lançar</b>, no centro da barra de baixo, e registre as entradas (Boleta Principal e Patrocinadores) num passo a passo.' },
+    { art: '🧾',
+      title: 'Gastos',
+      text: 'Em <b>Gastos</b>, cadastre as despesas fixas (aluguel, prebenda…) e as contas do mês (luz, água…).' },
+    { art: '🏠 📅',
+      title: 'Acompanhe o resultado',
+      text: 'Em <b>Início</b> você vê o saldo do mês (verde = positivo, vermelho = negativo). Em <b>Histórico</b>, o resultado do ano e o gráfico.' },
+    { art: '📲 🔒',
+      title: 'Enviar e proteger',
+      text: 'Envie o resumo pro WhatsApp num toque. Tudo é protegido por PIN e fica só neste aparelho — lembre de fazer backup em Histórico.' },
+    { art: '🏢',
+      title: 'Sua unidade',
+      text: 'De qual unidade você é responsável agora? Você pode mudar depois em Ajustes.',
+      field: true }
+  ];
+  let obStep = 0;
+
+  function openOnboarding() {
+    obStep = 0;
+    $('#ob-unit').value = Store.getUnit();
+    $('#onboard').classList.remove('hidden');
+    obRender();
   }
+  function obClose() { $('#onboard').classList.add('hidden'); }
+  function obRender() {
+    const s = OB_SLIDES[obStep], last = obStep === OB_SLIDES.length - 1;
+    $('#ob-art').innerHTML = s.art;
+    $('#ob-title').textContent = s.title;
+    $('#ob-text').innerHTML = s.text;
+    $('#ob-field').classList.toggle('hidden', !s.field);
+    if (s.field) setTimeout(() => $('#ob-unit').focus(), 60);
+    $('#ob-back').style.visibility = obStep === 0 ? 'hidden' : 'visible';
+    $('#ob-next').textContent = last ? '✓ Começar' : 'Próximo';
+    $('#ob-dots').innerHTML = OB_SLIDES.map((_, i) =>
+      `<span class="ob-dot ${i === obStep ? 'is-on' : ''}"></span>`).join('');
+  }
+  function obNext() { if (obStep < OB_SLIDES.length - 1) { obStep++; obRender(); } else obFinish(); }
+  function obBack() { if (obStep > 0) { obStep--; obRender(); } }
+  function obFinish() {
+    const v = ($('#ob-unit').value || '').trim();
+    if (v) Store.setUnit(v);
+    obClose(); renderUnit(); renderConfig();
+  }
+  $('#ob-next').addEventListener('click', obNext);
+  $('#ob-back').addEventListener('click', obBack);
+  $('#ob-skip').addEventListener('click', obFinish);
+  $('#ob-unit').addEventListener('keydown', e => { if (e.key === 'Enter') obNext(); });
   function renderConfig() { $('#config-unit').textContent = Store.getUnit() || '(sem unidade definida)'; }
   $('#edit-unit').addEventListener('click', () => {
     promptText('Unidade responsável', 'Nome que aparece no topo do app e nos resumos.', Store.getUnit(), v => {
@@ -183,12 +225,7 @@
       toast('Unidade atualizada');
     });
   });
-  $('#show-welcome').addEventListener('click', () => {
-    askUnitSetup();
-    // após confirmar/cancelar, mantém a tela de Config em dia
-    const prev = modalOk;
-    modalOk = raw => { prev(raw); renderConfig(); };
-  });
+  $('#show-welcome').addEventListener('click', openOnboarding);
 
   /* =================================================================
      NAVEGAÇÃO ENTRE MESES E VIEWS
