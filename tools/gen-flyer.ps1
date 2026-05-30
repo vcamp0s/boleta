@@ -3,7 +3,7 @@
 Add-Type -AssemblyName System.Drawing
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
-$W = 1080; $H = 1560
+$W = 1080; $H = 1580
 $bmp = New-Object System.Drawing.Bitmap($W, $H)
 $g = [System.Drawing.Graphics]::FromImage($bmp)
 $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
@@ -84,8 +84,9 @@ Text-L '2.  Compartilhar (quadrado com seta)' 120 1316 $fStep $bText
 Text-L '3.  Adicionar à Tela de Início' 120 1358 $fStep $bText
 
 # rodape
-$g.DrawLine($penLine, 120, 1430, 960, 1430)
-Text-C 'Grátis  •  Protegido por PIN  •  Seus dados ficam só no seu aparelho' 1462 (New-Font 22 $false) $bDim
+$g.DrawLine($penLine, 120, 1418, 960, 1418)
+Text-C 'Grátis  •  Protegido por PIN  •  Seus dados ficam só no seu aparelho' 1442 (New-Font 22 $false) $bDim
+Text-C 'Erros ou bugs?  WhatsApp (11) 93295-5199' 1498 (New-Font 23 $true) $bNeon
 
 $out = Join-Path $root 'boleta-instalar.png'
 $bmp.Save($out, [System.Drawing.Imaging.ImageFormat]::Png)

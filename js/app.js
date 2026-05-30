@@ -179,7 +179,7 @@
       text: 'Em <b>Início</b> você vê o saldo do mês (verde = positivo, vermelho = negativo). Em <b>Histórico</b>, o resultado do ano e o gráfico.' },
     { art: '📲 🔒',
       title: 'Enviar e proteger',
-      text: 'Envie o resumo pro WhatsApp num toque. Tudo é protegido por PIN e fica só neste aparelho — lembre de fazer backup em Histórico.' },
+      text: 'Envie o resumo pro WhatsApp num toque. Tudo é protegido por PIN e fica só neste aparelho — lembre de fazer backup em Histórico.<br><br>Encontrou um erro? Avise o desenvolvedor no WhatsApp <b>(11) 93295-5199</b>.' },
     { art: '🏢',
       title: 'Sua unidade',
       text: 'De qual unidade você é responsável agora? Você pode mudar depois em Ajustes.',
