@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#070b16" />
+  <title>Boleta · Como instalar no celular</title>
+
+  <!-- Pré-visualização ao compartilhar o link (WhatsApp etc.) -->
+  <meta property="og:title" content="Boleta · Controle financeiro" />
+  <meta property="og:description" content="Instale o app no seu celular: grátis, seguro e seus dados ficam só no seu aparelho." />
+  <meta property="og:image" content="https://vcamp0s.github.io/boleta/icons/icon-512.png" />
+  <meta property="og:url" content="https://vcamp0s.github.io/boleta/instalar.html" />
+  <meta property="og:type" content="website" />
+
+  <link rel="icon" href="icons/icon-192.png" type="image/png" />
+  <style>
+    :root{
+      --bg:#070b16; --surface:#0f1830; --surface2:#131e3c; --line:#1d2c52;
+      --text:#e8f0ff; --dim:#8aa0c8; --faint:#54688f;
+      --neon:#28e0ff; --neon2:#2f6bff; --pos:#1fffa8;
+      --glow:0 0 22px rgba(40,224,255,.35);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+      color:var(--text); min-height:100vh; padding:28px 18px 48px;
+      background:
+        radial-gradient(900px 480px at 80% -10%, rgba(47,107,255,.18), transparent 60%),
+        radial-gradient(700px 420px at -10% 110%, rgba(40,224,255,.12), transparent 60%),
+        var(--bg);
+    }
+    .wrap{max-width:480px;margin:0 auto;}
+    .head{text-align:center;margin-bottom:26px}
+    .logo{width:96px;height:96px;border-radius:22px;object-fit:contain;
+      filter:drop-shadow(0 0 18px rgba(40,224,255,.45));margin-bottom:14px}
+    .title{font-size:30px;font-weight:800;letter-spacing:6px}
+    .sub{color:var(--dim);font-size:14px;margin-top:4px}
+
+    .card{background:linear-gradient(135deg,var(--surface2),var(--surface));
+      border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px}
+    .card h2{font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--faint);margin-bottom:14px}
+
+    .qr-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+    .qr{background:#fff;padding:12px;border-radius:14px;line-height:0;box-shadow:var(--glow)}
+    .qr img{width:200px;height:200px;display:block}
+    .link{display:inline-block;background:var(--surface);border:1px solid var(--neon);
+      color:var(--neon);font-weight:700;font-size:15px;padding:10px 16px;border-radius:12px;
+      word-break:break-all;text-decoration:none;box-shadow:var(--glow)}
+    .qr-hint{color:var(--dim);font-size:13px}
+
+    .step{display:flex;gap:12px;align-items:flex-start;margin-bottom:13px}
+    .step:last-child{margin-bottom:0}
+    .num{flex:0 0 26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--neon),var(--neon2));
+      color:#04111f;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center}
+    .step p{font-size:14.5px;line-height:1.45;color:var(--text);padding-top:2px}
+    .step b{color:var(--neon)}
+    .os{font-size:16px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+    .btn{display:block;text-align:center;text-decoration:none;
+      background:linear-gradient(135deg,var(--neon),var(--neon2));color:#04111f;
+      font-weight:800;font-size:16px;padding:16px;border-radius:14px;box-shadow:var(--glow);margin-top:6px}
+    .note{text-align:center;color:var(--faint);font-size:12.5px;margin-top:18px;line-height:1.6}
+    .badge{display:inline-block;color:var(--pos);font-weight:700}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <img class="logo" src="icons/icon-192.png" alt="Boleta" />
+      <div class="title">BOLETA</div>
+      <div class="sub">Controle financeiro da semana</div>
+    </div>
+
+    <div class="card">
+      <div class="qr-wrap">
+        <div class="qr">
+          <img alt="QR code para abrir o Boleta"
+            src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=https%3A%2F%2Fvcamp0s.github.io%2Fboleta%2F" />
+        </div>
+        <a class="link" href="https://vcamp0s.github.io/boleta/">vcamp0s.github.io/boleta</a>
+        <div class="qr-hint">Aponte a câmera do celular para o QR — ou digite o link acima.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="os">📱 No Android (Chrome)</div>
+      <div class="step"><span class="num">1</span><p>Abra o link <b>no Chrome</b>.</p></div>
+      <div class="step"><span class="num">2</span><p>Toque no menu <b>⋮</b> (três pontinhos, no canto).</p></div>
+      <div class="step"><span class="num">3</span><p>Toque em <b>“Instalar app”</b> (ou “Adicionar à tela inicial”).</p></div>
+      <div class="step"><span class="num">4</span><p>Confirme — o ícone do Boleta aparece na tela inicial. ✅</p></div>
+    </div>
+
+    <div class="card">
+      <div class="os">🍎 No iPhone (Safari)</div>
+      <div class="step"><span class="num">1</span><p>Abra o link <b>no Safari</b>.</p></div>
+      <div class="step"><span class="num">2</span><p>Toque no botão <b>Compartilhar</b> (quadrado com seta para cima).</p></div>
+      <div class="step"><span class="num">3</span><p>Role e toque em <b>“Adicionar à Tela de Início”</b>.</p></div>
+      <div class="step"><span class="num">4</span><p>Toque em <b>“Adicionar”</b>. Pronto! ✅</p></div>
+    </div>
+
+    <a class="btn" href="https://vcamp0s.github.io/boleta/">Abrir o Boleta agora →</a>
+
+    <p class="note">
+      <span class="badge">Grátis e seguro.</span><br>
+      Protegido por uma senha (PIN) de 4 dígitos.<br>
+      Seus dados ficam guardados <b>só no seu aparelho</b> — ninguém mais vê.
+    </p>
+  </div>
+</body>
+</html>
