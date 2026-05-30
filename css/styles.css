@@ -219,6 +219,8 @@ button { font-family: inherit; cursor: pointer; }
 .setting-row:last-child { border-bottom: none; }
 .setting-row__name { font-size: 15px; font-weight: 600; }
 .setting-row__sub { font-size: 12px; color: var(--text-faint); margin-top: 2px; }
+.about-link { display: inline-block; margin-top: 4px; color: var(--neon); font-weight: 700;
+  text-decoration: none; border-bottom: 1px solid rgba(40, 224, 255, .4); padding-bottom: 1px; }
 
 /* overlay de troca de PIN (reaproveita .keypad e .pin-dots) */
 .pin-overlay {
