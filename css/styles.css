@@ -278,6 +278,40 @@ button { font-family: inherit; cursor: pointer; }
 .btn--small { padding: 7px 12px; font-size: 12.5px; }
 .btn--block { width: 100%; margin-top: 24px; padding: 15px; font-size: 15px; }
 
+.export-actions { display: flex; flex-direction: column; gap: 10px; }
+.export-actions .btn { width: 100%; padding: 14px; font-size: 15px; }
+
+/* ====================== SELETOR (bottom sheet) ====================== */
+.sheet {
+  position: fixed; inset: 0; z-index: 75;
+  display: flex; align-items: flex-end; justify-content: center;
+  background: rgba(3, 6, 14, 0.7); backdrop-filter: blur(4px);
+}
+.sheet__box {
+  width: 100%; max-width: 620px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 20px 20px 0 0; padding: 18px 16px calc(20px + env(safe-area-inset-bottom));
+  box-shadow: 0 -8px 40px rgba(0,0,0,.5);
+  animation: sheetUp .22s ease;
+}
+@keyframes sheetUp { from { transform: translateY(40px); opacity: .4 } to { transform: translateY(0); opacity: 1 } }
+.sheet__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.sheet__title { font-size: 16px; }
+.sheet__close { width: 32px; height: 32px; border-radius: 8px; background: transparent;
+  border: 1px solid var(--line); color: var(--text-dim); font-size: 14px; }
+.sheet__list { display: flex; flex-direction: column; gap: 8px; }
+.picker-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 14px 15px; border-radius: var(--radius-sm);
+  background: var(--surface-2); border: 1px solid var(--line); color: var(--text);
+  font-size: 15px; text-align: left;
+}
+.picker-item:active { border-color: var(--neon); box-shadow: var(--glow); }
+.picker-item__name { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.picker-item__sub { color: var(--text-dim); font-size: 13px; }
+.picker-item__tag { font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .5px; color: var(--bg); background: var(--neon); padding: 2px 7px; border-radius: 999px; }
+
 /* ====================== TABBAR ====================== */
 .tabbar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;

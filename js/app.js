@@ -405,9 +405,9 @@
   }
 
   /* =================================================================
-     EXPORTAR PARA WHATSAPP
+     EXPORTAR PARA WHATSAPP (semanal ou mensal)
      ================================================================= */
-  $('#export-btn').addEventListener('click', async () => {
+  function buildMonthlyText() {
     const s = Store.monthSummary(cur.year, cur.month);
     const mKey = U.monthKey(cur.year, cur.month);
     const sinal = s.saldo >= 0 ? '🟢' : '🔴';
@@ -423,16 +423,61 @@
     Store.getVariable(mKey).forEach(v => { txt += `  • ${v.name}: ${U.moneyBR(v.amount)}\n`; });
     txt += `━━━━━━━━━━━━━━\n`;
     txt += `${sinal} *SALDO: ${U.moneyBR(s.saldo)}*`;
+    return txt;
+  }
 
+  function buildWeeklyText(weekKey, index, week) {
+    const mKey = U.monthKey(cur.year, cur.month);
+    const inc = Store.getIncome(mKey, weekKey);
+    const total = (inc.principal || 0) + (inc.patrocinadores || 0);
+    let txt = `*BOLETA · Semana ${index + 1}*\n`;
+    txt += `${U.monthLabel(cur.year, cur.month)} · ${U.ddmm(week.start)}–${U.ddmm(week.end)}\n`;
+    txt += `━━━━━━━━━━━━━━\n`;
+    txt += `*ENTRADAS DA SEMANA:* ${U.moneyBR(total)}\n`;
+    txt += `  • Boleta Principal: ${U.moneyBR(inc.principal || 0)}\n`;
+    txt += `  • Patrocinadores: ${U.moneyBR(inc.patrocinadores || 0)}`;
+    return txt;
+  }
+
+  async function copyOrShare(txt, label) {
     try {
       await navigator.clipboard.writeText(txt);
       toast('Resumo copiado! Cole no WhatsApp 📲');
     } catch (e) {
-      // fallback: compartilhamento nativo ou modal com o texto
+      // fallback: compartilhamento nativo ou modal com o texto p/ copiar manual
       if (navigator.share) { try { await navigator.share({ text: txt }); return; } catch (_) {} }
-      showTextModal('Resumo do mês', txt);
+      showTextModal(label, txt);
     }
+  }
+
+  $('#export-month').addEventListener('click', () => copyOrShare(buildMonthlyText(), 'Resumo do mês'));
+  $('#export-week').addEventListener('click', () => {
+    const weeks = U.weeksOfMonth(cur.year, cur.month);
+    chooseWeek(weeks, key => {
+      const idx = weeks.findIndex(w => w.key === key);
+      copyOrShare(buildWeeklyText(key, idx, weeks[idx]), 'Resumo da semana ' + (idx + 1));
+    });
   });
+
+  /* seletor de semana (bottom sheet) */
+  const picker = $('#picker');
+  function chooseWeek(weeks, cb) {
+    const todayIso = U.iso(new Date());
+    const list = $('#picker-list');
+    list.innerHTML = weeks.map((w, i) => {
+      const atual = w.key <= todayIso && todayIso <= U.iso(w.end);
+      return `<button class="picker-item" data-key="${w.key}">
+        <span class="picker-item__name">Semana ${i + 1}${atual ? ' <span class="picker-item__tag">atual</span>' : ''}</span>
+        <span class="picker-item__sub">${U.ddmm(w.start)}–${U.ddmm(w.end)}</span>
+      </button>`;
+    }).join('');
+    picker.classList.remove('hidden');
+    $$('#picker-list .picker-item').forEach(btn =>
+      btn.addEventListener('click', () => { closePicker(); cb(btn.dataset.key); }));
+  }
+  function closePicker() { picker.classList.add('hidden'); }
+  $('#picker-close').addEventListener('click', closePicker);
+  picker.addEventListener('click', e => { if (e.target === picker) closePicker(); });
 
   /* =================================================================
      BACKUP / RESTAURAÇÃO (.json)

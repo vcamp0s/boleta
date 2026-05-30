@@ -81,9 +81,11 @@
         <h2 class="section-title">Saídas</h2>
         <div class="breakdown" id="breakdown-saidas"></div>
 
-        <button class="btn btn--neon btn--block" id="export-btn">
-          📲 Exportar resumo para o WhatsApp
-        </button>
+        <h2 class="section-title">Enviar por WhatsApp</h2>
+        <div class="export-actions">
+          <button class="btn btn--neon" id="export-week">📲 Resumo da semana</button>
+          <button class="btn btn--neon" id="export-month">📲 Resumo do mês</button>
+        </div>
       </section>
 
       <!-- ---------- ENTRADAS ---------- -->
@@ -203,6 +205,17 @@
         <button class="btn btn--ghost" id="modal-cancel">Cancelar</button>
         <button class="btn btn--neon" id="modal-ok">Confirmar</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ====================== SELETOR DE SEMANA (export) ====================== -->
+  <div class="sheet hidden" id="picker">
+    <div class="sheet__box">
+      <div class="sheet__head">
+        <h3 class="sheet__title" id="picker-title">Escolha a semana</h3>
+        <button class="sheet__close" id="picker-close" aria-label="Fechar">✕</button>
+      </div>
+      <div class="sheet__list" id="picker-list"></div>
     </div>
   </div>
 
