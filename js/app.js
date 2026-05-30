@@ -10,6 +10,7 @@
   let cur = { year: now.getFullYear(), month: now.getMonth() };
   let activeView = 'resumo';
   let histYear = cur.year;
+  let yearSel = null;   // mês selecionado no gráfico anual (índice 0-11)
 
   /* =================================================================
      TELA DE BLOQUEIO / PIN
@@ -438,7 +439,7 @@
       <span class="ysum__label">Resultado de ${histYear}</span>
       <span class="ysum__saldo">${U.moneyBR(ys.saldo)}</span>
       <span class="ysum__meta">${mesesTxt} · média ${U.moneyBR(ys.media)}/mês</span>
-      ${yearChartHtml(histYear)}
+      <div id="ychart-wrap"></div>
       <div class="ysum__grid">
         <div class="ysum__cell"><span>Entradas no ano</span><b class="pos">${U.moneyBR(ys.entradas)}</b></div>
         <div class="ysum__cell"><span>Saídas no ano</span><b class="neg">${U.moneyBR(ys.saidas)}</b></div>
@@ -447,29 +448,49 @@
       </div>
       <button class="btn btn--neon ysum__export" id="export-year">📲 Resumo do ano</button>`;
     $('#export-year').addEventListener('click', () => copyOrShare(buildYearText(histYear), 'Resumo do ano'));
+    yearSel = null;          // reset ao trocar de ano; renderYearChart escolhe o padrão
+    renderYearChart();
   }
 
-  /** mini-gráfico de barras (12 meses) com linha de base no zero */
-  function yearChartHtml(year) {
+  const capMes = m => U.MESES[m].charAt(0).toUpperCase() + U.MESES[m].slice(1);
+
+  /** mini-gráfico de barras (12 meses, base no zero) com mês selecionável */
+  function renderYearChart() {
+    const year = histYear;
     const months = [];
-    let maxAbs = 1;
+    let maxAbs = 1, lastActive = null;
     for (let m = 0; m < 12; m++) {
       const has = Store.monthHasActivity(year, m);
       const saldo = has ? Store.monthSummary(year, m).saldo : null;
-      if (has) maxAbs = Math.max(maxAbs, Math.abs(saldo));
+      if (has) { maxAbs = Math.max(maxAbs, Math.abs(saldo)); lastActive = m; }
       months.push({ m, has, saldo });
     }
+    if (yearSel === null) yearSel = lastActive;   // padrão: último mês com movimento
+
     const cols = months.map(({ m, has, saldo }) => {
       const posH = has && saldo >= 0 ? Math.max(6, Math.round(saldo / maxAbs * 100)) : 0;
       const negH = has && saldo < 0 ? Math.max(6, Math.round(-saldo / maxAbs * 100)) : 0;
-      const title = has ? `${U.MESES[m]}: ${U.moneyBR(saldo)}` : `${U.MESES[m]}: sem movimento`;
-      return `<div class="ychart__col${has ? '' : ' is-empty'}" title="${title}">
+      const sel = m === yearSel;
+      const cls = 'ychart__col' + (has ? '' : ' is-empty') + (sel ? ' is-sel' : '');
+      const pill = sel ? `<span class="ychart__pill">${capMes(m)}</span>` : '';
+      return `<div class="${cls}" data-m="${m}">
         <div class="ychart__half ychart__half--pos"><i class="ychart__bar is-pos" style="height:${posH}%"></i></div>
         <div class="ychart__half ychart__half--neg"><i class="ychart__bar is-neg" style="height:${negH}%"></i></div>
-        <span class="ychart__m">${U.MESES[m].slice(0, 3)}</span>
+        <span class="ychart__m">${U.MESES[m].slice(0, 3)}</span>${pill}
       </div>`;
     }).join('');
-    return `<div class="ychart">${cols}</div>`;
+
+    let cap = '<div class="ychart__cap ychart__cap--hint">Toque numa barra para ver o mês</div>';
+    if (yearSel !== null) {
+      const sm = months[yearSel];
+      cap = sm.has
+        ? `<div class="ychart__cap"><b>${capMes(yearSel)}</b> · <b class="${sm.saldo >= 0 ? 'pos' : 'neg'}">${U.moneyBR(sm.saldo)}</b></div>`
+        : `<div class="ychart__cap"><b>${capMes(yearSel)}</b> · <span class="muted">sem movimento</span></div>`;
+    }
+
+    $('#ychart-wrap').innerHTML = `<div class="ychart">${cols}</div>${cap}`;
+    $$('#ychart-wrap .ychart__col').forEach(col =>
+      col.addEventListener('click', () => { yearSel = Number(col.dataset.m); renderYearChart(); }));
   }
 
   /* =================================================================

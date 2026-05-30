@@ -292,6 +292,21 @@ button { font-family: inherit; cursor: pointer; }
 .ychart__m { text-align: center; font-size: 9px; color: var(--text-faint);
   margin-top: 5px; line-height: 1; white-space: nowrap; }
 .ychart__col.is-empty .ychart__m { opacity: .45; }
+.ychart__col { position: relative; cursor: pointer; border-radius: 6px; }
+.ychart__col.is-sel { background: rgba(40, 224, 255, 0.09); }
+.ychart__col.is-sel .ychart__bar { filter: brightness(1.18); outline: 2px solid rgba(255,255,255,.18); }
+.ychart__col.is-sel .ychart__m { visibility: hidden; }   /* dá lugar à pílula */
+.ychart__pill {
+  position: absolute; left: 50%; bottom: -1px; transform: translateX(-50%);
+  background: var(--neon); color: #04111f; font-weight: 700; font-size: 9.5px;
+  padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+  box-shadow: var(--glow); z-index: 3;
+}
+.ychart__cap { text-align: center; font-size: 13px; color: var(--text); margin-top: 2px; }
+.ychart__cap b.pos { color: var(--pos); }
+.ychart__cap b.neg { color: var(--neg); }
+.ychart__cap .muted { color: var(--text-faint); }
+.ychart__cap--hint { color: var(--text-faint); font-size: 12px; }
 
 .hist-row {
   display: flex; align-items: center; justify-content: space-between;
