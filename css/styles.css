@@ -105,7 +105,11 @@ button { font-family: inherit; cursor: pointer; }
 .topbar__brand { display: flex; align-items: center; gap: 9px; }
 .topbar__logo { width: 26px; height: 26px; object-fit: contain; border-radius: 7px;
   filter: drop-shadow(0 0 6px rgba(40, 224, 255, 0.45)); }
+.topbar__titles { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
 .topbar__name { font-weight: 800; letter-spacing: 2px; font-size: 15px; }
+.topbar__unit { font-size: 10.5px; color: var(--neon); font-weight: 600; letter-spacing: .3px;
+  max-width: 132px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar__unit:empty { display: none; }
 
 .month-nav { display: flex; align-items: center; gap: 4px; }
 .month-nav__btn {
@@ -285,8 +289,8 @@ button { font-family: inherit; cursor: pointer; }
 .ychart__bar { width: 64%; min-width: 4px; border-radius: 3px; display: block; transition: height .3s ease; }
 .ychart__bar.is-pos { background: var(--pos); box-shadow: 0 0 8px rgba(31,255,168,.45); }
 .ychart__bar.is-neg { background: var(--neg); box-shadow: 0 0 8px rgba(255,59,107,.45); }
-.ychart__m { text-align: center; font-size: 9.5px; color: var(--text-faint);
-  margin-top: 4px; line-height: 1; }
+.ychart__m { text-align: center; font-size: 9px; color: var(--text-faint);
+  margin-top: 5px; line-height: 1; white-space: nowrap; }
 .ychart__col.is-empty .ychart__m { opacity: .45; }
 
 .hist-row {

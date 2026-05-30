@@ -77,6 +77,7 @@
   function unlock() {
     lockEl.classList.add('hidden');
     appEl.classList.remove('hidden');
+    renderUnit();
     renderAll();
   }
 
@@ -158,6 +159,17 @@
   $('#change-pin').addEventListener('click', changePinFlow);
   $('#lock-from-config').addEventListener('click', startLock);
 
+  /* ---------------- UNIDADE ---------------- */
+  function renderUnit() { $('#topbar-unit').textContent = Store.getUnit(); }
+  function renderConfig() { $('#config-unit').textContent = Store.getUnit() || '(sem unidade definida)'; }
+  $('#edit-unit').addEventListener('click', () => {
+    promptText('Unidade responsável', 'Nome que aparece no topo do app e nos resumos.', Store.getUnit(), v => {
+      Store.setUnit(v.trim());
+      renderUnit(); renderConfig();
+      toast('Unidade atualizada');
+    });
+  });
+
   /* =================================================================
      NAVEGAÇÃO ENTRE MESES E VIEWS
      ================================================================= */
@@ -190,6 +202,7 @@
     if (activeView === 'entradas')  renderEntradas();
     if (activeView === 'despesas')  renderDespesas();
     if (activeView === 'historico') renderHistorico();
+    if (activeView === 'config')    renderConfig();
   }
 
   /* ---------------- RESUMO ---------------- */
@@ -438,7 +451,6 @@
 
   /** mini-gráfico de barras (12 meses) com linha de base no zero */
   function yearChartHtml(year) {
-    const L = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
     const months = [];
     let maxAbs = 1;
     for (let m = 0; m < 12; m++) {
@@ -454,7 +466,7 @@
       return `<div class="ychart__col${has ? '' : ' is-empty'}" title="${title}">
         <div class="ychart__half ychart__half--pos"><i class="ychart__bar is-pos" style="height:${posH}%"></i></div>
         <div class="ychart__half ychart__half--neg"><i class="ychart__bar is-neg" style="height:${negH}%"></i></div>
-        <span class="ychart__m">${L[m]}</span>
+        <span class="ychart__m">${U.MESES[m].slice(0, 3)}</span>
       </div>`;
     }).join('');
     return `<div class="ychart">${cols}</div>`;
@@ -467,7 +479,9 @@
     const s = Store.monthSummary(cur.year, cur.month);
     const mKey = U.monthKey(cur.year, cur.month);
     const sinal = s.saldo >= 0 ? '🟢' : '🔴';
+    const u = Store.getUnit();
     let txt = `*BOLETA · ${U.monthLabel(cur.year, cur.month)}*\n`;
+    if (u) txt += `_${u}_\n`;
     txt += `━━━━━━━━━━━━━━\n`;
     txt += `*ENTRADAS:* ${U.moneyBR(s.entradas)}\n`;
     txt += `  • Boleta Principal: ${U.moneyBR(s.principal)}\n`;
@@ -486,7 +500,9 @@
     const mKey = U.monthKey(cur.year, cur.month);
     const inc = Store.getIncome(mKey, weekKey);
     const total = (inc.principal || 0) + (inc.patrocinadores || 0);
+    const u = Store.getUnit();
     let txt = `*BOLETA · Semana ${index + 1}*\n`;
+    if (u) txt += `_${u}_\n`;
     txt += `${U.monthLabel(cur.year, cur.month)} · ${U.ddmm(week.start)}–${U.ddmm(week.end)}\n`;
     txt += `━━━━━━━━━━━━━━\n`;
     txt += `*ENTRADAS DA SEMANA:* ${U.moneyBR(total)}\n`;
@@ -499,7 +515,9 @@
     const ys = Store.yearSummary(year);
     const sinal = ys.saldo >= 0 ? '🟢' : '🔴';
     const mesesTxt = ys.meses > 1 ? `${ys.meses} meses ativos` : `${ys.meses} mês ativo`;
+    const u = Store.getUnit();
     let txt = `*BOLETA · Ano ${year}*\n`;
+    if (u) txt += `_${u}_\n`;
     txt += `━━━━━━━━━━━━━━\n`;
     txt += `*ENTRADAS:* ${U.moneyBR(ys.entradas)}\n`;
     txt += `  • Boleta Principal: ${U.moneyBR(ys.principal)}\n`;

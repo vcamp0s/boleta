@@ -14,6 +14,7 @@ const Store = (() => {
 
   const empty = () => ({
     pinHash: null,
+    unit: 'Assunção - SBC',
     fixedExpenses: [],
     variable: {},
     income: {}
@@ -38,6 +39,10 @@ const Store = (() => {
   }
 
   const uid = () => 'x' + Math.abs(U.hash(String(performance.now()) + state.fixedExpenses.length)).toString();
+
+  /* ---------------- UNIDADE ---------------- */
+  function getUnit() { return state.unit || ''; }
+  function setUnit(v) { state.unit = v; save(); }
 
   /* ---------------- PIN ---------------- */
   function hasPin() { return !!state.pinHash; }
@@ -175,6 +180,7 @@ const Store = (() => {
       app: 'boleta',
       version: 1,
       exportedAt: new Date().toISOString(),
+      unit: state.unit,
       fixedExpenses: state.fixedExpenses,
       variable: state.variable,
       income: state.income
@@ -187,6 +193,7 @@ const Store = (() => {
     const okVar = data.variable && typeof data.variable === 'object' && !Array.isArray(data.variable);
     const okInc = data.income && typeof data.income === 'object' && !Array.isArray(data.income);
     if (!okFixed && !okVar && !okInc) throw new Error('Não parece um backup do Boleta.');
+    if (typeof data.unit === 'string') state.unit = data.unit;
     if (okFixed) state.fixedExpenses = data.fixedExpenses;
     if (okVar)   state.variable = data.variable;
     if (okInc)   state.income = data.income;
@@ -195,6 +202,7 @@ const Store = (() => {
 
   return {
     raw: () => state,
+    getUnit, setUnit,
     hasPin, setPin, checkPin,
     getIncome, setIncome, incomeTotals,
     fixedList: () => state.fixedExpenses, fixedAmount, addFixed, setFixedAmount,

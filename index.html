@@ -45,7 +45,10 @@
     <header class="topbar">
       <div class="topbar__brand">
         <img class="topbar__logo" src="icons/company.png" alt="" />
-        <span class="topbar__name">Boleta</span>
+        <div class="topbar__titles">
+          <span class="topbar__name">Boleta</span>
+          <span class="topbar__unit" id="topbar-unit"></span>
+        </div>
       </div>
       <div class="month-nav">
         <button class="month-nav__btn" id="prev-month" aria-label="Mês anterior">‹</button>
@@ -144,6 +147,17 @@
 
       <!-- ---------- CONFIGURAÇÕES ---------- -->
       <section class="view hidden" id="view-config">
+        <div class="panel">
+          <h2 class="section-title section-title--flush">Unidade responsável</h2>
+          <div class="setting-row">
+            <div>
+              <div class="setting-row__name" id="config-unit">—</div>
+              <div class="setting-row__sub">Aparece no topo do app e nos resumos</div>
+            </div>
+            <button class="btn btn--small" id="edit-unit">Editar</button>
+          </div>
+        </div>
+
         <div class="panel">
           <h2 class="section-title section-title--flush">Segurança</h2>
           <div class="setting-row">
