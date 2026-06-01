@@ -599,7 +599,7 @@
       </div>`;
     }).join('');
 
-    let cap = '<div class="ychart__cap ychart__cap--hint">Toque numa barra para ver o mês</div>';
+    let cap = '<div class="ychart__cap ychart__cap--hint">Toque ou arraste o dedo nas barras</div>';
     if (yearSel !== null) {
       const sm = months[yearSel];
       cap = sm.has
@@ -607,9 +607,34 @@
         : `<div class="ychart__cap"><b>${capMes(yearSel)}</b> · <span class="muted">sem movimento</span></div>`;
     }
 
-    $('#ychart-wrap').innerHTML = `<div class="ychart">${cols}</div>${cap}`;
-    $$('#ychart-wrap .ychart__col').forEach(col =>
-      col.addEventListener('click', () => { yearSel = Number(col.dataset.m); renderYearChart(); }));
+    const wrap = $('#ychart-wrap');
+    wrap.innerHTML = `<div class="ychart">${cols}</div>${cap}`;
+    bindChartDrag(wrap);
+  }
+
+  /** seleção do mês por toque OU arrasto do dedo sobre as barras.
+   *  Liga uma vez por elemento #ychart-wrap (persiste entre re-renders internos). */
+  function bindChartDrag(wrap) {
+    if (wrap.dataset.dragBound) return;
+    wrap.dataset.dragBound = '1';
+    let dragging = false;
+    const pick = (x, y) => {
+      const el = document.elementFromPoint(x, y);
+      const col = el && el.closest('.ychart__col');
+      if (col) {
+        const m = Number(col.dataset.m);
+        if (m !== yearSel) { yearSel = m; renderYearChart(); }
+      }
+    };
+    wrap.addEventListener('pointerdown', e => {
+      dragging = true;
+      try { wrap.setPointerCapture(e.pointerId); } catch (_) {}
+      pick(e.clientX, e.clientY);
+    });
+    wrap.addEventListener('pointermove', e => { if (dragging) pick(e.clientX, e.clientY); });
+    const stop = () => { dragging = false; };
+    wrap.addEventListener('pointerup', stop);
+    wrap.addEventListener('pointercancel', stop);
   }
 
   /* =================================================================
