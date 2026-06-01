@@ -240,6 +240,39 @@
     renderAll();
   }
 
+  /* tocar no nome do mês abre o seletor de mês/ano (bottom sheet) */
+  $('#month-label').addEventListener('click', chooseMonth);
+  function chooseMonth() {
+    $('#picker-title').textContent = 'Escolha o mês';
+    const list = $('#picker-list');
+    let py = cur.year;
+    function draw() {
+      const grid = U.MESES.map((nm, m) => {
+        const sel = (m === cur.month && py === cur.year);
+        const act = Store.monthHasActivity(py, m);
+        const nome = nm.charAt(0).toUpperCase() + nm.slice(1, 3);
+        return `<button class="mpick__m ${sel ? 'is-sel' : ''}" data-m="${m}">${nome}${act ? '<i class="mpick__dot"></i>' : ''}</button>`;
+      }).join('');
+      list.innerHTML = `<div class="mpick">
+        <div class="mpick__yr">
+          <button class="mpick__yrbtn" data-d="-1" aria-label="Ano anterior">‹</button>
+          <span class="mpick__yrlabel">${py}</span>
+          <button class="mpick__yrbtn" data-d="1" aria-label="Próximo ano">›</button>
+        </div>
+        <div class="mpick__grid">${grid}</div>
+      </div>`;
+      $$('#picker-list .mpick__yrbtn').forEach(b =>
+        b.addEventListener('click', () => { py += Number(b.dataset.d); draw(); }));
+      $$('#picker-list .mpick__m').forEach(b =>
+        b.addEventListener('click', () => {
+          cur = { year: py, month: Number(b.dataset.m) };
+          closePicker(); renderAll();
+        }));
+    }
+    draw();
+    picker.classList.remove('hidden');
+  }
+
   $$('.tab').forEach(tab => tab.addEventListener('click', () => {
     activeView = tab.dataset.view;
     $$('.tab').forEach(t => t.classList.toggle('is-active', t === tab));
@@ -669,6 +702,7 @@
   /* seletor de semana (bottom sheet) */
   const picker = $('#picker');
   function chooseWeek(weeks, cb) {
+    $('#picker-title').textContent = 'Escolha a semana';
     const todayIso = U.iso(new Date());
     const list = $('#picker-list');
     list.innerHTML = weeks.map((w, i) => {
