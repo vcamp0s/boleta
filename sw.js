@@ -1,5 +1,5 @@
 /* Service Worker — cache offline básico (app shell) */
-const CACHE = 'boleta-v20';
+const CACHE = 'boleta-v21';
 const ASSETS = [
   './',
   './index.html',
@@ -24,14 +24,14 @@ self.addEventListener('activate', e => {
   );
 });
 
-// cache-first p/ os assets do app; rede como fallback
+// network-first: com internet pega sempre a versão nova; cache é só reserva offline
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
+    fetch(e.request).then(res => {
       const copy = res.clone();
       caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
       return res;
-    }).catch(() => caches.match('./index.html')))
+    }).catch(() => caches.match(e.request).then(hit => hit || caches.match('./index.html')))
   );
 });
