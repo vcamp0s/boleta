@@ -310,18 +310,37 @@ button { font-family: inherit; cursor: pointer; }
 .ychart__cap .muted { color: var(--text-faint); }
 .ychart__cap--hint { color: var(--text-faint); font-size: 12px; }
 
+.hist-item {
+  border-radius: var(--radius-sm); background: var(--surface);
+  border: 1px solid var(--line); margin-bottom: 9px; overflow: hidden;
+}
+.hist-item.is-open { border-color: var(--neon); }
 .hist-row {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 16px; border-radius: var(--radius-sm);
-  background: var(--surface); border: 1px solid var(--line); margin-bottom: 9px;
+  padding: 14px 16px; cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
-.hist-row__month { font-weight: 600; text-transform: capitalize; }
+.hist-row:active { background: rgba(255,255,255,.03); }
+.hist-row__month { font-weight: 600; text-transform: capitalize; display: flex; align-items: center; gap: 6px; }
+.hist-row__chev { color: var(--text-faint); font-size: 12px; transition: transform .18s ease; }
+.hist-item.is-open .hist-row__chev { transform: rotate(180deg); color: var(--neon); }
 .hist-row__meta { font-size: 11.5px; color: var(--text-faint); }
 .hist-row__bal { font-weight: 800; font-size: 16px; }
 .hist-row__bal.is-pos { color: var(--pos); }
 .hist-row__bal.is-neg { color: var(--neg); }
 .hist-bar { height: 5px; border-radius: 3px; background: var(--line); margin-top: 7px; overflow: hidden; }
 .hist-bar__fill { height: 100%; border-radius: 3px; }
+
+/* detalhe das semanas (expandido) */
+.wk-detail { padding: 4px 16px 12px; border-top: 1px solid var(--line); }
+.wk-row { padding: 9px 0; border-bottom: 1px dashed var(--line); }
+.wk-row:last-child { border-bottom: 0; }
+.wk-row__top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.wk-row__n { font-weight: 600; font-size: 13.5px; }
+.wk-row__n small { color: var(--text-faint); font-weight: 400; font-size: 11.5px; margin-left: 4px; }
+.wk-row__total { font-size: 14px; font-weight: 800; }
+.wk-row__total.pos { color: var(--pos); }
+.wk-row__total.muted { color: var(--text-faint); font-weight: 600; }
+.wk-row__sub { font-size: 11.5px; color: var(--text-faint); margin-top: 2px; }
 
 /* ====================== INPUTS / BOTÕES ====================== */
 .input {

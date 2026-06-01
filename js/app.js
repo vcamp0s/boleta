@@ -11,6 +11,7 @@
   let activeView = 'resumo';
   let histYear = cur.year;
   let yearSel = null;   // mês selecionado no gráfico anual (índice 0-11)
+  let histOpenMonth = null;   // mês expandido na lista do histórico (índice 0-11)
 
   /* =================================================================
      TELA DE BLOQUEIO / PIN
@@ -441,7 +442,7 @@
     $('#year-tabs').innerHTML = years.map(y =>
       `<button class="year-tab ${y === histYear ? 'is-active' : ''}" data-year="${y}">${y}</button>`).join('');
     $$('#year-tabs .year-tab').forEach(t => t.addEventListener('click', () => {
-      histYear = Number(t.dataset.year); renderHistorico();
+      histYear = Number(t.dataset.year); histOpenMonth = null; renderHistorico();
     }));
 
     renderYearSummary();
@@ -465,15 +466,44 @@
     list.innerHTML = visible.map(({ m, s }) => {
       const pos = s.saldo >= 0;
       const w = Math.max(4, Math.round(Math.abs(s.saldo) / maxAbs * 100));
-      return `<div class="hist-row">
-        <div>
-          <div class="hist-row__month">${U.MESES[m]}</div>
-          <div class="hist-row__meta">${U.moneyBR(s.entradas)} entradas · ${U.moneyBR(s.saidas)} saídas</div>
-          <div class="hist-bar"><div class="hist-bar__fill" style="width:${w}%;background:${pos ? 'var(--pos)' : 'var(--neg)'}"></div></div>
+      const open = m === histOpenMonth;
+      return `<div class="hist-item ${open ? 'is-open' : ''}">
+        <div class="hist-row" data-m="${m}" role="button" tabindex="0" aria-expanded="${open}">
+          <div>
+            <div class="hist-row__month">${U.MESES[m]}<span class="hist-row__chev">▾</span></div>
+            <div class="hist-row__meta">${U.moneyBR(s.entradas)} entradas · ${U.moneyBR(s.saidas)} saídas</div>
+            <div class="hist-bar"><div class="hist-bar__fill" style="width:${w}%;background:${pos ? 'var(--pos)' : 'var(--neg)'}"></div></div>
+          </div>
+          <div class="hist-row__bal ${pos ? 'is-pos' : 'is-neg'}">${U.moneyBR(s.saldo)}</div>
         </div>
-        <div class="hist-row__bal ${pos ? 'is-pos' : 'is-neg'}">${U.moneyBR(s.saldo)}</div>
+        ${open ? renderWeeksDetail(m) : ''}
       </div>`;
     }).join('');
+    $$('#history-list .hist-row').forEach(row => row.addEventListener('click', () => {
+      const m = Number(row.dataset.m);
+      histOpenMonth = histOpenMonth === m ? null : m;
+      renderHistorico();
+    }));
+  }
+
+  /** detalhe expansível: como foram as semanas (seg–dom) do mês */
+  function renderWeeksDetail(m) {
+    const mKey = U.monthKey(histYear, m);
+    const weeks = U.weeksOfMonth(histYear, m);
+    const rows = weeks.map((wk, i) => {
+      const inc = Store.getIncome(mKey, wk.key);
+      const principal = inc.principal || 0;
+      const patro = inc.patrocinadores || 0;
+      const total = principal + patro;
+      return `<div class="wk-row">
+        <div class="wk-row__top">
+          <span class="wk-row__n">Semana ${i + 1} <small>${U.ddmm(wk.start)}–${U.ddmm(wk.end)}</small></span>
+          <b class="wk-row__total ${total > 0 ? 'pos' : 'muted'}">${U.moneyBR(total)}</b>
+        </div>
+        <div class="wk-row__sub">Principal ${U.moneyBR(principal)} · Patrocinadores ${U.moneyBR(patro)}</div>
+      </div>`;
+    }).join('');
+    return `<div class="wk-detail">${rows}</div>`;
   }
 
   /* ---------------- RESUMO ANUAL ---------------- */
