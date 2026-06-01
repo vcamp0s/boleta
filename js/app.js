@@ -593,7 +593,13 @@
     txt += `*ENTRADAS:* ${U.moneyBR(s.entradas)}\n`;
     txt += `  • Boleta Principal: ${U.moneyBR(s.principal)}\n`;
     txt += `  • Patrocinadores: ${U.moneyBR(s.patrocinadores)}\n\n`;
-    txt += `*SAÍDAS:* ${U.moneyBR(s.saidas)}\n`;
+    txt += `*POR SEMANA:*\n`;
+    U.weeksOfMonth(cur.year, cur.month).forEach((wk, i) => {
+      const inc = Store.getIncome(mKey, wk.key);
+      txt += `  ${i + 1}. ${U.ddmm(wk.start)}–${U.ddmm(wk.end)}\n`;
+      txt += `     Boleta: ${U.moneyBR(inc.principal || 0)} · Patrocinador: ${U.moneyBR(inc.patrocinadores || 0)}\n`;
+    });
+    txt += `\n*SAÍDAS:* ${U.moneyBR(s.saidas)}\n`;
     Store.fixedList().forEach(it => {
       txt += `  • ${it.name}: ${U.moneyBR(Store.fixedAmount(it, cur.year))}\n`;
     });
