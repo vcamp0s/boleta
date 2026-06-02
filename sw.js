@@ -1,5 +1,5 @@
 /* Service Worker — cache offline básico (app shell) */
-const CACHE = 'boleta-v28';
+const CACHE = 'boleta-v29';
 const ASSETS = [
   './',
   './index.html',
@@ -14,7 +14,12 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  // {cache:'reload'} força buscar do servidor (ignora o cache HTTP do navegador) ao pré-cachear
+  e.waitUntil(
+    caches.open(CACHE)
+      .then(c => c.addAll(ASSETS.map(u => new Request(u, { cache: 'reload' }))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', e => {
@@ -24,11 +29,12 @@ self.addEventListener('activate', e => {
   );
 });
 
-// network-first: com internet pega sempre a versão nova; cache é só reserva offline
+// network-first com revalidação: com internet sempre confere a versão nova no servidor
+// ({cache:'no-cache'} evita o cache HTTP do navegador servir arquivo velho); cache é reserva offline
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    fetch(e.request).then(res => {
+    fetch(e.request, { cache: 'no-cache' }).then(res => {
       const copy = res.clone();
       caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
       return res;
