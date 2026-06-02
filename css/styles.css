@@ -223,6 +223,16 @@ button { font-family: inherit; cursor: pointer; }
 .setting-row__sub { font-size: 12px; color: var(--text-faint); margin-top: 2px; }
 .about-link { display: inline-block; margin-top: 4px; color: var(--neon); font-weight: 700;
   text-decoration: none; border-bottom: 1px solid rgba(40, 224, 255, .4); padding-bottom: 1px; }
+.about-cta { display: flex; align-items: center; gap: 12px;
+  margin-top: 10px; padding: 13px 14px; border-radius: var(--radius-sm);
+  background: var(--surface-2); border: 1px solid var(--neon); box-shadow: var(--glow);
+  text-decoration: none; color: var(--text); -webkit-tap-highlight-color: transparent; }
+.about-cta:active { transform: scale(.99); filter: brightness(1.08); }
+.about-cta__ic { font-size: 22px; line-height: 1; }
+.about-cta__tx { display: flex; flex-direction: column; line-height: 1.25; flex: 1; min-width: 0; }
+.about-cta__tx b { color: var(--neon); font-size: 15px; }
+.about-cta__tx small { color: var(--text-faint); font-size: 11.5px; margin-top: 1px; }
+.about-cta__go { color: var(--neon); font-size: 22px; font-weight: 700; }
 
 /* overlay de troca de PIN (reaproveita .keypad e .pin-dots) */
 .pin-overlay {

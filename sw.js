@@ -1,5 +1,5 @@
 /* Service Worker — cache offline básico (app shell) */
-const CACHE = 'boleta-v26';
+const CACHE = 'boleta-v27';
 const ASSETS = [
   './',
   './index.html',
