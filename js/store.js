@@ -49,26 +49,56 @@ const Store = (() => {
   function setPin(pin) { state.pinHash = U.hash(pin); save(); }
   function checkPin(pin) { return state.pinHash === U.hash(pin); }
 
-  /* ---------------- ENTRADAS (income) ---------------- */
+  /* ---------------- ENTRADAS (income) ----------------
+     Cada semana tem 2 categorias (principal, patrocinadores) e cada uma é
+     dividida pela FORMA de recebimento: espécie (dinheiro) e outros (pix/cartão/transf.).
+     principal/patrocinadores são mantidos como TOTAL (espécie+outros) p/ compatibilidade. */
+  function blankIncome() {
+    return {
+      principal: 0, patrocinadores: 0,
+      principalEspecie: 0, principalOutros: 0,
+      patrocinadoresEspecie: 0, patrocinadoresOutros: 0
+    };
+  }
+  /** normaliza: garante as partes, migra dados antigos (só total) p/ "outros" e recalcula totais */
+  function normIncome(raw) {
+    const o = Object.assign(blankIncome(), raw || {});
+    if (!o.principalEspecie && !o.principalOutros && o.principal > 0) o.principalOutros = o.principal;
+    if (!o.patrocinadoresEspecie && !o.patrocinadoresOutros && o.patrocinadores > 0) o.patrocinadoresOutros = o.patrocinadores;
+    o.principal = (o.principalEspecie || 0) + (o.principalOutros || 0);
+    o.patrocinadores = (o.patrocinadoresEspecie || 0) + (o.patrocinadoresOutros || 0);
+    return o;
+  }
   function getIncome(mKey, weekKey) {
     const m = state.income[mKey];
-    if (!m || !m[weekKey]) return { principal: 0, patrocinadores: 0 };
-    return m[weekKey];
+    return normIncome(m && m[weekKey]);
   }
-  function setIncome(mKey, weekKey, field, value) {
+  /** seta uma parte; category: 'principal'|'patrocinadores', method: 'especie'|'outros' */
+  function setIncomePart(mKey, weekKey, category, method, value) {
     if (!state.income[mKey]) state.income[mKey] = {};
-    if (!state.income[mKey][weekKey]) state.income[mKey][weekKey] = { principal: 0, patrocinadores: 0 };
-    state.income[mKey][weekKey][field] = value;
+    const rec = normIncome(state.income[mKey][weekKey]);
+    rec[category + (method === 'especie' ? 'Especie' : 'Outros')] = value;
+    rec.principal = (rec.principalEspecie || 0) + (rec.principalOutros || 0);
+    rec.patrocinadores = (rec.patrocinadoresEspecie || 0) + (rec.patrocinadoresOutros || 0);
+    state.income[mKey][weekKey] = rec;
     save();
   }
   function incomeTotals(mKey) {
     const m = state.income[mKey] || {};
     let principal = 0, patrocinadores = 0;
-    Object.values(m).forEach(w => {
-      principal += w.principal || 0;
-      patrocinadores += w.patrocinadores || 0;
+    let pEsp = 0, pOut = 0, paEsp = 0, paOut = 0;
+    Object.keys(m).forEach(wk => {
+      const w = normIncome(m[wk]);
+      principal += w.principal; patrocinadores += w.patrocinadores;
+      pEsp += w.principalEspecie || 0; pOut += w.principalOutros || 0;
+      paEsp += w.patrocinadoresEspecie || 0; paOut += w.patrocinadoresOutros || 0;
     });
-    return { principal, patrocinadores, total: principal + patrocinadores };
+    return {
+      principal, patrocinadores, total: principal + patrocinadores,
+      especie: pEsp + paEsp, outros: pOut + paOut,
+      principalEspecie: pEsp, principalOutros: pOut,
+      patrocinadoresEspecie: paEsp, patrocinadoresOutros: paOut
+    };
   }
 
   /* ---------------- DESPESAS FIXAS ---------------- */
@@ -136,6 +166,9 @@ const Store = (() => {
       entradas: inc.total,
       principal: inc.principal,
       patrocinadores: inc.patrocinadores,
+      especie: inc.especie, outros: inc.outros,
+      principalEspecie: inc.principalEspecie, principalOutros: inc.principalOutros,
+      patrocinadoresEspecie: inc.patrocinadoresEspecie, patrocinadoresOutros: inc.patrocinadoresOutros,
       fixed, variable, saidas,
       saldo: inc.total - saidas
     };
@@ -156,11 +189,15 @@ const Store = (() => {
   /** resumo do ano agregando apenas os meses com movimento */
   function yearSummary(year) {
     let entradas = 0, principal = 0, patrocinadores = 0, fixed = 0, variable = 0, meses = 0;
+    let especie = 0, outros = 0, pEsp = 0, pOut = 0, paEsp = 0, paOut = 0;
     let melhor = null, pior = null;
     for (let m = 0; m < 12; m++) {
       if (!monthHasActivity(year, m)) continue;
       const s = monthSummary(year, m);
       entradas += s.entradas; principal += s.principal; patrocinadores += s.patrocinadores;
+      especie += s.especie; outros += s.outros;
+      pEsp += s.principalEspecie; pOut += s.principalOutros;
+      paEsp += s.patrocinadoresEspecie; paOut += s.patrocinadoresOutros;
       fixed += s.fixed; variable += s.variable; meses++;
       if (!melhor || s.saldo > melhor.saldo) melhor = { month: m, saldo: s.saldo };
       if (!pior  || s.saldo < pior.saldo)   pior   = { month: m, saldo: s.saldo };
@@ -168,6 +205,9 @@ const Store = (() => {
     const saidas = fixed + variable;
     return {
       entradas, principal, patrocinadores, fixed, variable, saidas,
+      especie, outros,
+      principalEspecie: pEsp, principalOutros: pOut,
+      patrocinadoresEspecie: paEsp, patrocinadoresOutros: paOut,
       saldo: entradas - saidas, meses, melhor, pior,
       media: meses ? (entradas - saidas) / meses : 0
     };
@@ -204,7 +244,7 @@ const Store = (() => {
     raw: () => state,
     getUnit, setUnit,
     hasPin, setPin, checkPin,
-    getIncome, setIncome, incomeTotals,
+    getIncome, setIncomePart, incomeTotals,
     fixedList: () => state.fixedExpenses, fixedAmount, addFixed, setFixedAmount,
     renameFixed, removeFixed, applyAnnualAdjust, fixedTotal,
     getVariable, addVariable, setVariableAmount, removeVariable, variableTotal,

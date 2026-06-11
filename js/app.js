@@ -313,7 +313,12 @@
     const be = $('#breakdown-entradas');
     be.innerHTML =
       bdRow('Boleta Principal', s.principal, 'in') +
-      bdRow('Patrocinadores', s.patrocinadores, 'in');
+      bdRow('Patrocinadores', s.patrocinadores, 'in') +
+      (s.entradas > 0 ? `<div class="bd-methods">
+        <span>💵 Espécie <b>${U.moneyBR(s.especie)}</b></span>
+        <span class="bd-methods__sep">·</span>
+        <span>💳 Outros <b>${U.moneyBR(s.outros)}</b></span>
+      </div>` : '');
 
     // saídas: fixas (cada uma) + variáveis (cada uma)
     const bs = $('#breakdown-saidas');
@@ -341,7 +346,7 @@
     const wrap = $('#weeks-list');
     wrap.innerHTML = weeks.map((w, i) => {
       const inc = Store.getIncome(mKey, w.key);
-      const total = (inc.principal || 0) + (inc.patrocinadores || 0);
+      const total = inc.principal + inc.patrocinadores;
       return `<div class="week" data-week="${w.key}">
         <div class="week__head">
           <div>
@@ -350,16 +355,8 @@
           </div>
           <div class="week__total" data-total>${U.moneyBR(total)}</div>
         </div>
-        <div class="in-field">
-          <span class="in-field__label"><span class="bd-row__dot"></span><b>Boleta Principal</b></span>
-          <input class="input input--money" inputmode="decimal" data-field="principal"
-            value="${inc.principal ? U.numBR(inc.principal) : ''}" placeholder="0,00" />
-        </div>
-        <div class="in-field">
-          <span class="in-field__label"><span class="bd-row__dot"></span><b>Patrocinadores</b></span>
-          <input class="input input--money" inputmode="decimal" data-field="patrocinadores"
-            value="${inc.patrocinadores ? U.numBR(inc.patrocinadores) : ''}" placeholder="0,00" />
-        </div>
+        ${catBlock('Boleta Principal', 'principal', inc.principalEspecie, inc.principalOutros)}
+        ${catBlock('Patrocinadores', 'patrocinadores', inc.patrocinadoresEspecie, inc.patrocinadoresOutros)}
       </div>`;
     }).join('');
 
@@ -369,12 +366,30 @@
         inp.addEventListener('change', () => {
           const val = U.parseNum(inp.value);
           inp.value = val ? U.numBR(val) : '';
-          Store.setIncome(mKey, wKey, inp.dataset.field, val);
+          Store.setIncomePart(mKey, wKey, inp.dataset.cat, inp.dataset.method, val);
           const inc = Store.getIncome(mKey, wKey);
-          $('[data-total]', weekEl).textContent = U.moneyBR((inc.principal || 0) + (inc.patrocinadores || 0));
+          $('[data-total]', weekEl).textContent = U.moneyBR(inc.principal + inc.patrocinadores);
         });
       });
     });
+  }
+  /** bloco de uma categoria com 2 campos: Espécie (dinheiro) e Outros (pix/cartão/transf.) */
+  function catBlock(label, cat, esp, out) {
+    return `<div class="in-cat">
+      <div class="in-cat__head"><span class="bd-row__dot"></span><b>${label}</b></div>
+      <div class="in-pair">
+        <label class="in-mini">
+          <span class="in-mini__lab">💵 Espécie</span>
+          <input class="input input--money" inputmode="decimal" data-cat="${cat}" data-method="especie"
+            value="${esp ? U.numBR(esp) : ''}" placeholder="0,00" />
+        </label>
+        <label class="in-mini">
+          <span class="in-mini__lab">Outros <span class="pay-syms" title="Pix, cartão (maquininha) ou transferência">💳 🏦 Pix</span></span>
+          <input class="input input--money" inputmode="decimal" data-cat="${cat}" data-method="outros"
+            value="${out ? U.numBR(out) : ''}" placeholder="0,00" />
+        </label>
+      </div>
+    </div>`;
   }
 
   /* ---------------- DESPESAS ---------------- */
@@ -528,12 +543,15 @@
       const principal = inc.principal || 0;
       const patro = inc.patrocinadores || 0;
       const total = principal + patro;
+      const esp = inc.principalEspecie + inc.patrocinadoresEspecie;
+      const out = inc.principalOutros + inc.patrocinadoresOutros;
       return `<div class="wk-row">
         <div class="wk-row__top">
           <span class="wk-row__n">Semana ${i + 1} <small>${U.ddmm(wk.start)}–${U.ddmm(wk.end)}</small></span>
           <b class="wk-row__total ${total > 0 ? 'pos' : 'muted'}">${U.moneyBR(total)}</b>
         </div>
         <div class="wk-row__sub">Principal ${U.moneyBR(principal)} · Patrocinadores ${U.moneyBR(patro)}</div>
+        ${total > 0 ? `<div class="wk-row__sub wk-row__sub--m">💵 Espécie ${U.moneyBR(esp)} · 💳 Outros ${U.moneyBR(out)}</div>` : ''}
       </div>`;
     }).join('');
     return `<div class="wk-detail">${rows}</div>`;
@@ -650,7 +668,9 @@
     txt += `━━━━━━━━━━━━━━\n`;
     txt += `*ENTRADAS:* ${U.moneyBR(s.entradas)}\n`;
     txt += `  • Boleta Principal: ${U.moneyBR(s.principal)}\n`;
-    txt += `  • Patrocinadores: ${U.moneyBR(s.patrocinadores)}\n\n`;
+    txt += `       💵 Espécie: ${U.moneyBR(s.principalEspecie)} · 💳 Outros: ${U.moneyBR(s.principalOutros)}\n`;
+    txt += `  • Patrocinadores: ${U.moneyBR(s.patrocinadores)}\n`;
+    txt += `       💵 Espécie: ${U.moneyBR(s.patrocinadoresEspecie)} · 💳 Outros: ${U.moneyBR(s.patrocinadoresOutros)}\n\n`;
     txt += `*POR SEMANA:*\n`;
     U.weeksOfMonth(cur.year, cur.month).forEach((wk, i) => {
       const inc = Store.getIncome(mKey, wk.key);
@@ -677,8 +697,10 @@
     txt += `${U.monthLabel(cur.year, cur.month)} · ${U.ddmm(week.start)}–${U.ddmm(week.end)}\n`;
     txt += `━━━━━━━━━━━━━━\n`;
     txt += `*ENTRADAS DA SEMANA:* ${U.moneyBR(total)}\n`;
-    txt += `  • Boleta Principal: ${U.moneyBR(inc.principal || 0)}\n`;
-    txt += `  • Patrocinadores: ${U.moneyBR(inc.patrocinadores || 0)}`;
+    txt += `  • Boleta Principal: ${U.moneyBR(inc.principal)}\n`;
+    txt += `       💵 Espécie: ${U.moneyBR(inc.principalEspecie)} · 💳 Outros: ${U.moneyBR(inc.principalOutros)}\n`;
+    txt += `  • Patrocinadores: ${U.moneyBR(inc.patrocinadores)}\n`;
+    txt += `       💵 Espécie: ${U.moneyBR(inc.patrocinadoresEspecie)} · 💳 Outros: ${U.moneyBR(inc.patrocinadoresOutros)}`;
     return txt;
   }
 
@@ -692,7 +714,9 @@
     txt += `━━━━━━━━━━━━━━\n`;
     txt += `*ENTRADAS:* ${U.moneyBR(ys.entradas)}\n`;
     txt += `  • Boleta Principal: ${U.moneyBR(ys.principal)}\n`;
-    txt += `  • Patrocinadores: ${U.moneyBR(ys.patrocinadores)}\n\n`;
+    txt += `       💵 Espécie: ${U.moneyBR(ys.principalEspecie)} · 💳 Outros: ${U.moneyBR(ys.principalOutros)}\n`;
+    txt += `  • Patrocinadores: ${U.moneyBR(ys.patrocinadores)}\n`;
+    txt += `       💵 Espécie: ${U.moneyBR(ys.patrocinadoresEspecie)} · 💳 Outros: ${U.moneyBR(ys.patrocinadoresOutros)}\n\n`;
     txt += `*SAÍDAS:* ${U.moneyBR(ys.saidas)}\n`;
     txt += `  • Fixas: ${U.moneyBR(ys.fixed)}\n`;
     txt += `  • Variáveis: ${U.moneyBR(ys.variable)}\n`;
@@ -796,7 +820,7 @@
   /* =================================================================
      ASSISTENTE DE LANÇAMENTO GUIADO (wizard)
      ================================================================= */
-  let wiz = null;   // { weeks, mKey, weekIdx, principal, patrocinadores, step }
+  let wiz = null;   // { weeks, mKey, weekIdx, step, pEsp, pOut, paEsp, paOut }
 
   function openWizard() {
     const weeks = U.weeksOfMonth(cur.year, cur.month);
@@ -804,8 +828,8 @@
     const todayIso = U.iso(new Date());
     let weekIdx = weeks.findIndex(w => w.key <= todayIso && todayIso <= U.iso(w.end));
     if (weekIdx < 0) weekIdx = 0;
-    const inc = Store.getIncome(mKey, weeks[weekIdx].key);
-    wiz = { weeks, mKey, weekIdx, principal: inc.principal || 0, patrocinadores: inc.patrocinadores || 0, step: 1 };
+    wiz = { weeks, mKey, weekIdx, step: 1 };
+    wizLoadWeek();
     $('#wizard').classList.remove('hidden');
     wizRender();
   }
@@ -813,8 +837,10 @@
 
   function wizLoadWeek() {
     const inc = Store.getIncome(wiz.mKey, wiz.weeks[wiz.weekIdx].key);
-    wiz.principal = inc.principal || 0;
-    wiz.patrocinadores = inc.patrocinadores || 0;
+    wiz.pEsp = inc.principalEspecie || 0;
+    wiz.pOut = inc.principalOutros || 0;
+    wiz.paEsp = inc.patrocinadoresEspecie || 0;
+    wiz.paOut = inc.patrocinadoresOutros || 0;
   }
 
   function wizRender() {
@@ -846,32 +872,47 @@
       $('#wiz-title').textContent = isPrinc ? 'Boleta Principal' : 'Patrocinadores';
       $('#wiz-sub').textContent = periodo;
       next.textContent = 'Próximo';
-      const val = isPrinc ? wiz.principal : wiz.patrocinadores;
-      body.innerHTML = `<label class="wiz-field">
+      const esp = isPrinc ? wiz.pEsp : wiz.paEsp;
+      const out = isPrinc ? wiz.pOut : wiz.paOut;
+      body.innerHTML = `<div class="wiz-field">
         <span>Quanto entrou ${isPrinc ? 'na Boleta Principal' : 'de Patrocinadores'} nesta semana?</span>
-        <div class="wiz-money"><span>R$</span>
-          <input class="input wiz-input" id="wiz-val" inputmode="decimal" placeholder="0,00"
-            value="${val ? U.numBR(val) : ''}" /></div>
-      </label>`;
-      const inp = $('#wiz-val');
-      setTimeout(() => { inp.focus(); inp.select(); }, 60);
-      inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); wizNext(); } });
+        <div class="wiz-pair">
+          <label class="wiz-mini">
+            <span class="wiz-mini__lab">💵 Espécie</span>
+            <div class="wiz-money"><span>R$</span>
+              <input class="input wiz-input wiz-input--sm" id="wiz-esp" inputmode="decimal" placeholder="0,00"
+                value="${esp ? U.numBR(esp) : ''}" /></div>
+          </label>
+          <label class="wiz-mini">
+            <span class="wiz-mini__lab">Outros <span class="pay-syms" title="Pix, cartão (maquininha) ou transferência">💳 🏦 Pix</span></span>
+            <div class="wiz-money"><span>R$</span>
+              <input class="input wiz-input wiz-input--sm" id="wiz-out" inputmode="decimal" placeholder="0,00"
+                value="${out ? U.numBR(out) : ''}" /></div>
+          </label>
+        </div>
+      </div>`;
+      const inpe = $('#wiz-esp'), inpo = $('#wiz-out');
+      setTimeout(() => { inpe.focus(); inpe.select(); }, 60);
+      inpe.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); inpo.focus(); inpo.select(); } });
+      inpo.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); wizNext(); } });
     } else {
       $('#wiz-title').textContent = 'Confirmar';
       $('#wiz-sub').textContent = periodo;
       next.textContent = '✓ Salvar';
-      const total = wiz.principal + wiz.patrocinadores;
+      const principal = wiz.pEsp + wiz.pOut, patro = wiz.paEsp + wiz.paOut, total = principal + patro;
       body.innerHTML = `<div class="wiz-summary">
-        <div class="wiz-srow"><span>Boleta Principal</span><b>${U.moneyBR(wiz.principal)}</b></div>
-        <div class="wiz-srow"><span>Patrocinadores</span><b>${U.moneyBR(wiz.patrocinadores)}</b></div>
+        <div class="wiz-srow"><span>Boleta Principal</span><b>${U.moneyBR(principal)}</b></div>
+        <div class="wiz-srow wiz-srow--sub"><span>💵 Espécie ${U.moneyBR(wiz.pEsp)} · 💳 Outros ${U.moneyBR(wiz.pOut)}</span></div>
+        <div class="wiz-srow"><span>Patrocinadores</span><b>${U.moneyBR(patro)}</b></div>
+        <div class="wiz-srow wiz-srow--sub"><span>💵 Espécie ${U.moneyBR(wiz.paEsp)} · 💳 Outros ${U.moneyBR(wiz.paOut)}</span></div>
         <div class="wiz-srow wiz-srow--total"><span>Total da semana</span><b class="pos">${U.moneyBR(total)}</b></div>
       </div>`;
     }
   }
 
   function wizCaptureInput() {
-    if (wiz.step === 2) wiz.principal = U.parseNum($('#wiz-val').value);
-    if (wiz.step === 3) wiz.patrocinadores = U.parseNum($('#wiz-val').value);
+    if (wiz.step === 2) { wiz.pEsp = U.parseNum($('#wiz-esp').value); wiz.pOut = U.parseNum($('#wiz-out').value); }
+    if (wiz.step === 3) { wiz.paEsp = U.parseNum($('#wiz-esp').value); wiz.paOut = U.parseNum($('#wiz-out').value); }
   }
   function wizNext() {
     wizCaptureInput();
@@ -883,8 +924,10 @@
   }
   function wizSave() {
     const idx = wiz.weekIdx, w = wiz.weeks[idx];
-    Store.setIncome(wiz.mKey, w.key, 'principal', wiz.principal);
-    Store.setIncome(wiz.mKey, w.key, 'patrocinadores', wiz.patrocinadores);
+    Store.setIncomePart(wiz.mKey, w.key, 'principal', 'especie', wiz.pEsp);
+    Store.setIncomePart(wiz.mKey, w.key, 'principal', 'outros', wiz.pOut);
+    Store.setIncomePart(wiz.mKey, w.key, 'patrocinadores', 'especie', wiz.paEsp);
+    Store.setIncomePart(wiz.mKey, w.key, 'patrocinadores', 'outros', wiz.paOut);
     wizClose();
     renderEntradas();
     if (activeView === 'resumo') renderResumo();
