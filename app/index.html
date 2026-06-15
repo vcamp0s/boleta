@@ -19,15 +19,24 @@
     min-height:100vh; padding:28px 18px 56px;
   }
   .wrap{max-width:480px; margin:0 auto}
-  .logo{display:block; width:120px; height:120px; margin:8px auto 14px; border-radius:26px;
+  .logo{display:block; width:116px; height:116px; margin:8px auto 14px; border-radius:26px;
     box-shadow:0 0 40px rgba(40,224,255,.25)}
   h1{font-size:25px; text-align:center; margin:0 0 4px; letter-spacing:.2px}
-  .sub{text-align:center; color:var(--dim); font-size:15px; margin:0 0 24px}
+  .sub{text-align:center; color:var(--dim); font-size:15px; margin:0 0 22px}
+
+  /* seletor Android / iPhone */
+  .toggle{display:flex; gap:8px; background:rgba(14,26,51,.7); border:1px solid var(--line);
+    border-radius:16px; padding:6px; margin:0 0 22px}
+  .tg{flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
+    background:transparent; color:var(--dim); border:0; cursor:pointer;
+    font-family:inherit; font-size:16px; font-weight:700; padding:13px 8px; border-radius:11px;
+    transition:.15s}
+  .tg .ic{font-size:19px}
+  .tg.on{background:linear-gradient(135deg,#28e0ff,#4da3ff); color:#04111f;
+    box-shadow:0 6px 18px rgba(40,224,255,.3)}
+
   .plat{display:none}
   .plat.on{display:block}
-  .ptitle{text-align:center; font-size:13px; letter-spacing:.6px; text-transform:uppercase;
-    color:var(--dim); margin:0 0 16px}
-  .ptitle b{color:var(--neon)}
   .cta{
     display:flex; align-items:center; justify-content:center; gap:10px;
     background:linear-gradient(135deg,#28e0ff,#4da3ff); color:#04111f;
@@ -55,19 +64,22 @@
   .foot{text-align:center; color:var(--dim); font-size:13px; line-height:1.7; margin-top:24px}
   .foot a{color:var(--neon); text-decoration:none; font-weight:700}
   .pos{color:var(--pos); font-weight:700}
-  .switch{text-align:center; margin-top:18px; font-size:13.5px}
-  .switch a{color:var(--blue); text-decoration:none}
 </style>
 </head>
 <body>
   <div class="wrap">
     <img class="logo" src="../icons/icon-512-2.png" alt="Boleta">
     <h1>Boleta <span style="color:var(--dim);font-weight:600">- Controle Financeiro</span></h1>
-    <p class="sub">Instale como app no seu celular</p>
+    <p class="sub">Instale como app · escolha o seu aparelho</p>
+
+    <!-- SELETOR -->
+    <div class="toggle" role="tablist">
+      <button class="tg" data-p="android"><span class="ic">🤖</span> Android</button>
+      <button class="tg" data-p="ios"><span class="ic">🍎</span> iPhone</button>
+    </div>
 
     <!-- ============ ANDROID ============ -->
     <section id="android" class="plat">
-      <p class="ptitle">No seu <b>Android</b></p>
       <a class="cta" href="../Boleta.apk" download>
         <span>⬇️ Baixar o app
           <small>arquivo Boleta.apk · Android</small>
@@ -75,7 +87,7 @@
       </a>
       <p class="size">Grátis · 2,6 MB · protegido por PIN</p>
       <div class="card">
-        <h2>Como instalar</h2>
+        <h2>Como instalar no Android</h2>
         <div class="step"><div class="num">1</div><p>Toque em <b>“Baixar o app”</b> acima e aguarde o download.</p></div>
         <div class="step"><div class="num">2</div><p>Abra o arquivo <b>Boleta.apk</b> (na notificação ou em <b>Downloads</b>).</p></div>
         <div class="step"><div class="num">3</div><p>Permita <b>instalar apps desconhecidos</b> desta origem → ative e volte.</p></div>
@@ -83,15 +95,14 @@
       </div>
     </section>
 
-    <!-- ============ iPHONE / iOS ============ -->
+    <!-- ============ iPHONE ============ -->
     <section id="ios" class="plat">
-      <p class="ptitle">No seu <b>iPhone</b></p>
-      <div class="warn" id="ios-safari-warn">
+      <div class="warn">
         ⚠️ <b>Precisa ser no Safari.</b> Se você abriu pelo WhatsApp, Instagram ou Chrome,
         toque no menu <b>(•••)</b> ou no ícone de compartilhar e escolha <b>“Abrir no Safari”</b> antes de continuar.
       </div>
       <div class="card">
-        <h2>Adicionar à tela de início</h2>
+        <h2>Como instalar no iPhone</h2>
         <div class="step"><div class="num">1</div><p>No <b>Safari</b>, toque no botão <b>Compartilhar</b> — o quadradinho com uma <b>seta pra cima ⬆️</b> (na barra de baixo).</p></div>
         <div class="step"><div class="num">2</div><p>Role para baixo e toque em <b>“Adicionar à Tela de Início”</b>.</p></div>
         <div class="step"><div class="num">3</div><p>Toque em <b>“Adicionar”</b> no canto superior direito.</p></div>
@@ -101,25 +112,6 @@
         🍎 No iPhone, o app é instalado direto pelo Safari (a Apple não permite baixar arquivo de app por fora da loja). Funciona offline e fica protegido por PIN.
       </div>
     </section>
-
-    <!-- ============ DESKTOP / OUTROS ============ -->
-    <section id="other" class="plat">
-      <div class="warn">
-        📱 <b>Abra este link no seu celular</b> para instalar. Aponte a câmera para o QR do folheto,
-        ou envie este endereço para o seu telefone:
-        <br><b>vcamp0s.github.io/boleta/app</b>
-      </div>
-      <div class="card">
-        <h2>Android</h2>
-        <div class="step"><div class="num">1</div><p><a style="color:var(--neon)" href="../Boleta.apk" download>Baixar Boleta.apk</a>, abrir o arquivo e permitir instalar de origem desconhecida.</p></div>
-      </div>
-      <div class="card">
-        <h2>iPhone (Safari)</h2>
-        <div class="step"><div class="num">1</div><p>Compartilhar ⬆️ → <b>Adicionar à Tela de Início</b>.</p></div>
-      </div>
-    </section>
-
-    <p class="switch" id="switch"></p>
 
     <p class="foot">
       Dúvidas ou erros? <a href="https://wa.me/5511932955199?text=Ol%C3%A1!%20Sobre%20o%20app%20Boleta%3A%20">WhatsApp (11) 93295-5199</a>
@@ -131,27 +123,17 @@
       var ua = navigator.userAgent || '';
       var isIOS = /iPad|iPhone|iPod/.test(ua) ||
                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      var isAndroid = /Android/.test(ua);
-      var show = isAndroid ? 'android' : (isIOS ? 'ios' : 'other');
-      document.getElementById(show).classList.add('on');
+      var initial = isIOS ? 'ios' : 'android';
 
-      // No iOS, esconde o aviso "abra no Safari" se já estiver no Safari de verdade
-      if (isIOS) {
-        var inSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|GSA|FBAN|FBAV|Instagram|Line|MicroMessenger/.test(ua);
-        // Em standalone (já adicionado) ou Safari puro, o aviso é menos necessário, mas mantemos
-        // por segurança porque o WebView do WhatsApp também contém "Safari".
-      }
-
-      // Link para ver os passos do outro sistema
-      var sw = document.getElementById('switch');
-      if (show === 'android') sw.innerHTML = 'Está num iPhone? <a href="#" data-go="ios">Ver passos do iPhone</a>';
-      else if (show === 'ios') sw.innerHTML = 'Está num Android? <a href="#" data-go="android">Ver passos do Android</a>';
-      sw.addEventListener('click', function(e){
-        var t = e.target.closest('[data-go]'); if(!t) return; e.preventDefault();
+      function select(p){
         document.querySelectorAll('.plat').forEach(function(s){ s.classList.remove('on'); });
-        document.getElementById(t.dataset.go).classList.add('on');
-        sw.innerHTML = '<a href="#" data-go="'+show+'">Voltar</a>';
+        document.querySelectorAll('.tg').forEach(function(b){ b.classList.toggle('on', b.dataset.p === p); });
+        document.getElementById(p).classList.add('on');
+      }
+      document.querySelectorAll('.tg').forEach(function(b){
+        b.addEventListener('click', function(){ select(b.dataset.p); });
       });
+      select(initial);
     })();
   </script>
 </body>
