@@ -22,13 +22,18 @@
   let settingNewPin = false;
   let firstPinTry = '';
 
+  const HINT_CRIAR = 'Esta é a senha do app. Você vai digitá-la toda vez que abrir. Escolha 4 números fáceis de lembrar e não conte a ninguém.';
+  function setLockHint(msg) { $('#lock-hint').textContent = msg || ''; }
+
   function startLock() {
     if (!Store.hasPin()) {
       settingNewPin = true;
-      $('#lock-sub').textContent = 'Crie um PIN de 4 dígitos';
+      $('#lock-sub').textContent = 'Crie uma senha de 4 dígitos';
+      setLockHint(HINT_CRIAR);
     } else {
       settingNewPin = false;
-      $('#lock-sub').textContent = 'Digite seu PIN de 4 dígitos';
+      $('#lock-sub').textContent = 'Digite sua senha de 4 dígitos';
+      setLockHint('');
     }
     pinBuffer = ''; firstPinTry = '';
     renderDots();
@@ -59,13 +64,15 @@
     if (settingNewPin) {
       if (!firstPinTry) {
         firstPinTry = pinBuffer; pinBuffer = ''; renderDots();
-        $('#lock-sub').textContent = 'Confirme o PIN';
+        $('#lock-sub').textContent = 'Digite a senha de novo para confirmar';
+        setLockHint('Repita os mesmos 4 números que você acabou de escolher.');
         return;
       }
       if (firstPinTry !== pinBuffer) {
         firstPinTry = ''; pinBuffer = ''; renderDots();
-        $('#lock-sub').textContent = 'Crie um PIN de 4 dígitos';
-        pinError('Os PINs não conferem. Tente de novo.');
+        $('#lock-sub').textContent = 'Crie uma senha de 4 dígitos';
+        setLockHint(HINT_CRIAR);
+        pinError('As senhas não conferem. Tente de novo.');
         return;
       }
       Store.setPin(pinBuffer);
@@ -73,7 +80,7 @@
       openOnboarding();        // primeiro acesso: tour "como usar" + unidade
     } else {
       if (Store.checkPin(pinBuffer)) { unlock(); }
-      else { pinBuffer = ''; renderDots(); pinError('PIN incorreto.'); }
+      else { pinBuffer = ''; renderDots(); pinError('Senha incorreta.'); }
     }
   }
 
@@ -658,7 +665,8 @@
   /* =================================================================
      EXPORTAR PARA WHATSAPP (semanal, mensal ou anual)
      ================================================================= */
-  function buildMonthlyText() {
+  function buildMonthlyText(mode) {
+    const completo = mode === 'completo';
     const s = Store.monthSummary(cur.year, cur.month);
     const mKey = U.monthKey(cur.year, cur.month);
     const sinal = s.saldo >= 0 ? '🟢' : '🔴';
@@ -668,16 +676,20 @@
     txt += `━━━━━━━━━━━━━━\n`;
     txt += `*ENTRADAS:* ${U.moneyBR(s.entradas)}\n`;
     txt += `  • Boleta Principal: ${U.moneyBR(s.principal)}\n`;
-    txt += `       💵 Espécie: ${U.moneyBR(s.principalEspecie)} · 💳 Outros: ${U.moneyBR(s.principalOutros)}\n`;
+    if (completo) txt += `       💵 Espécie: ${U.moneyBR(s.principalEspecie)} · 💳 Outros: ${U.moneyBR(s.principalOutros)}\n`;
     txt += `  • Patrocinadores: ${U.moneyBR(s.patrocinadores)}\n`;
-    txt += `       💵 Espécie: ${U.moneyBR(s.patrocinadoresEspecie)} · 💳 Outros: ${U.moneyBR(s.patrocinadoresOutros)}\n\n`;
-    txt += `*POR SEMANA:*\n`;
-    U.weeksOfMonth(cur.year, cur.month).forEach((wk, i) => {
-      const inc = Store.getIncome(mKey, wk.key);
-      txt += `  ${i + 1}. ${U.ddmm(wk.start)}–${U.ddmm(wk.end)}\n`;
-      txt += `     Boleta: ${U.moneyBR(inc.principal || 0)} · Patrocinador: ${U.moneyBR(inc.patrocinadores || 0)}\n`;
-    });
-    txt += `\n*SAÍDAS:* ${U.moneyBR(s.saidas)}\n`;
+    if (completo) txt += `       💵 Espécie: ${U.moneyBR(s.patrocinadoresEspecie)} · 💳 Outros: ${U.moneyBR(s.patrocinadoresOutros)}\n`;
+    txt += `\n`;
+    if (completo) {
+      txt += `*POR SEMANA:*\n`;
+      U.weeksOfMonth(cur.year, cur.month).forEach((wk, i) => {
+        const inc = Store.getIncome(mKey, wk.key);
+        txt += `  ${i + 1}. ${U.ddmm(wk.start)}–${U.ddmm(wk.end)}\n`;
+        txt += `     Boleta: ${U.moneyBR(inc.principal || 0)} · Patrocinador: ${U.moneyBR(inc.patrocinadores || 0)}\n`;
+      });
+      txt += `\n`;
+    }
+    txt += `*SAÍDAS:* ${U.moneyBR(s.saidas)}\n`;
     Store.fixedList().forEach(it => {
       txt += `  • ${it.name}: ${U.moneyBR(Store.fixedAmount(it, cur.year))}\n`;
     });
@@ -687,7 +699,8 @@
     return txt;
   }
 
-  function buildWeeklyText(weekKey, index, week) {
+  function buildWeeklyText(weekKey, index, week, mode) {
+    const completo = mode === 'completo';
     const mKey = U.monthKey(cur.year, cur.month);
     const inc = Store.getIncome(mKey, weekKey);
     const total = (inc.principal || 0) + (inc.patrocinadores || 0);
@@ -697,10 +710,10 @@
     txt += `${U.monthLabel(cur.year, cur.month)} · ${U.ddmm(week.start)}–${U.ddmm(week.end)}\n`;
     txt += `━━━━━━━━━━━━━━\n`;
     txt += `*ENTRADAS DA SEMANA:* ${U.moneyBR(total)}\n`;
-    txt += `  • Boleta Principal: ${U.moneyBR(inc.principal)}\n`;
-    txt += `       💵 Espécie: ${U.moneyBR(inc.principalEspecie)} · 💳 Outros: ${U.moneyBR(inc.principalOutros)}\n`;
-    txt += `  • Patrocinadores: ${U.moneyBR(inc.patrocinadores)}\n`;
-    txt += `       💵 Espécie: ${U.moneyBR(inc.patrocinadoresEspecie)} · 💳 Outros: ${U.moneyBR(inc.patrocinadoresOutros)}`;
+    txt += `  • Boleta Principal: ${U.moneyBR(inc.principal)}`;
+    if (completo) txt += `\n       💵 Espécie: ${U.moneyBR(inc.principalEspecie)} · 💳 Outros: ${U.moneyBR(inc.principalOutros)}`;
+    txt += `\n  • Patrocinadores: ${U.moneyBR(inc.patrocinadores)}`;
+    if (completo) txt += `\n       💵 Espécie: ${U.moneyBR(inc.patrocinadoresEspecie)} · 💳 Outros: ${U.moneyBR(inc.patrocinadoresOutros)}`;
     return txt;
   }
 
@@ -739,14 +752,35 @@
     }
   }
 
-  $('#export-month').addEventListener('click', () => copyOrShare(buildMonthlyText(), 'Resumo do mês'));
+  $('#export-month').addEventListener('click', () => {
+    chooseFormat(mode => copyOrShare(buildMonthlyText(mode), 'Resumo do mês'));
+  });
   $('#export-week').addEventListener('click', () => {
     const weeks = U.weeksOfMonth(cur.year, cur.month);
-    chooseWeek(weeks, key => {
-      const idx = weeks.findIndex(w => w.key === key);
-      copyOrShare(buildWeeklyText(key, idx, weeks[idx]), 'Resumo da semana ' + (idx + 1));
+    chooseFormat(mode => {
+      chooseWeek(weeks, key => {
+        const idx = weeks.findIndex(w => w.key === key);
+        copyOrShare(buildWeeklyText(key, idx, weeks[idx], mode), 'Resumo da semana ' + (idx + 1));
+      });
     });
   });
+
+  /* seletor de formato do resumo (simples x completo) — reaproveita o bottom sheet #picker */
+  function chooseFormat(cb) {
+    $('#picker-title').textContent = 'Como exportar o resumo?';
+    $('#picker-list').innerHTML = `
+      <button class="picker-item" data-key="simples">
+        <span class="picker-item__name">Resumo simples</span>
+        <span class="picker-item__sub">Só os totais — Boleta e Patrocinador</span>
+      </button>
+      <button class="picker-item" data-key="completo">
+        <span class="picker-item__name">Resumo completo</span>
+        <span class="picker-item__sub">Tudo detalhado — espécie (dinheiro) e outros</span>
+      </button>`;
+    picker.classList.remove('hidden');
+    $$('#picker-list .picker-item').forEach(btn =>
+      btn.addEventListener('click', () => { closePicker(); cb(btn.dataset.key); }));
+  }
 
   /* seletor de semana (bottom sheet) */
   const picker = $('#picker');

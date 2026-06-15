@@ -72,6 +72,9 @@ button { font-family: inherit; cursor: pointer; }
 }
 .pin-dots span.filled { background: var(--neon); box-shadow: var(--glow); border-color: var(--neon); }
 .pin-error { color: var(--neg); font-size: 13px; min-height: 18px; }
+.lock__hint { color: var(--text-dim); font-size: 13px; line-height: 1.5;
+  max-width: 300px; margin: 4px auto 0; text-align: center; }
+.lock__hint:empty { display: none; }
 .lock.shake { animation: shake .4s; }
 @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-9px)} 40%,80%{transform:translateX(9px)} }
 
