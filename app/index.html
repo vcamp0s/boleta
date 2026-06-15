@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#070b16">
+<title>Instalar o app Boleta - Controle Financeiro</title>
+<style>
+  :root{
+    --bg:#070b16; --bg2:#0e1a33; --line:#1d2c52;
+    --text:#e8e0ff; --dim:#8aa0c8; --neon:#28e0ff; --blue:#4da3ff;
+    --pos:#36e0a0;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    color:var(--text);
+    background:linear-gradient(160deg,#101c3a,#070b16 60%);
+    min-height:100vh; padding:28px 18px 56px;
+  }
+  .wrap{max-width:480px; margin:0 auto}
+  .logo{display:block; width:120px; height:120px; margin:8px auto 14px; border-radius:26px;
+    box-shadow:0 0 40px rgba(40,224,255,.25)}
+  h1{font-size:25px; text-align:center; margin:0 0 4px; letter-spacing:.2px}
+  .sub{text-align:center; color:var(--dim); font-size:15px; margin:0 0 26px}
+  .cta{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    background:linear-gradient(135deg,#28e0ff,#4da3ff); color:#04111f;
+    font-weight:800; font-size:19px; text-decoration:none;
+    padding:18px 20px; border-radius:16px; text-align:center;
+    box-shadow:0 10px 30px rgba(40,224,255,.35);
+  }
+  .cta small{display:block; font-weight:600; font-size:12.5px; opacity:.8; margin-top:2px}
+  .size{text-align:center; color:var(--dim); font-size:12.5px; margin:10px 0 30px}
+  .card{background:rgba(14,26,51,.7); border:1px solid var(--line); border-radius:18px;
+    padding:18px 18px 6px; margin-bottom:18px}
+  .card h2{font-size:14px; letter-spacing:.6px; text-transform:uppercase;
+    color:var(--neon); margin:0 0 14px}
+  .step{display:flex; gap:13px; align-items:flex-start; margin-bottom:16px}
+  .num{flex:none; width:30px; height:30px; border-radius:50%; background:rgba(40,224,255,.12);
+    border:1px solid var(--neon); color:var(--neon); font-weight:800; font-size:15px;
+    display:grid; place-items:center}
+  .step p{margin:3px 0 0; font-size:15.5px; line-height:1.45}
+  .step b{color:#fff}
+  .tip{background:rgba(54,224,160,.08); border:1px solid rgba(54,224,160,.3);
+    border-radius:14px; padding:13px 15px; color:#bfeede; font-size:13.5px; line-height:1.5; margin-bottom:18px}
+  .foot{text-align:center; color:var(--dim); font-size:13px; line-height:1.7; margin-top:24px}
+  .foot a{color:var(--neon); text-decoration:none; font-weight:700}
+  .pos{color:var(--pos); font-weight:700}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <img class="logo" src="../icons/icon-512-2.png" alt="Boleta">
+    <h1>Boleta <span style="color:var(--dim);font-weight:600">- Controle Financeiro</span></h1>
+    <p class="sub">App para Android · instale em 4 passos</p>
+
+    <a class="cta" href="../Boleta.apk" download>
+      <span>⬇️ Baixar o app
+        <small>arquivo Boleta.apk · Android</small>
+      </span>
+    </a>
+    <p class="size">Grátis · 2,6 MB · protegido por PIN</p>
+
+    <div class="card">
+      <h2>Como instalar</h2>
+      <div class="step"><div class="num">1</div><p>Toque em <b>“Baixar o app”</b> acima e aguarde o download terminar.</p></div>
+      <div class="step"><div class="num">2</div><p>Abra o arquivo <b>Boleta.apk</b> baixado (na notificação ou em <b>Downloads</b>).</p></div>
+      <div class="step"><div class="num">3</div><p>O Android vai pedir para <b>permitir instalar apps desconhecidos</b> desta origem → toque em <b>Permitir / Configurações</b>, ative e volte.</p></div>
+      <div class="step"><div class="num">4</div><p>Toque em <b>Instalar</b>. Pronto: o app <b class="pos">Boleta</b> aparece na tela inicial. ✅</p></div>
+    </div>
+
+    <div class="tip">
+      🔒 É seguro: o app é só seu controle financeiro pessoal, protegido por PIN, e <b>seus dados ficam só no seu aparelho</b>. O aviso de “origem desconhecida” aparece porque o app é instalado direto, sem passar pela loja.
+    </div>
+
+    <p class="foot">
+      Está num iPhone? Esse app é só para Android.<br>
+      Dúvidas ou erros? <a href="https://wa.me/5511932955199?text=Ol%C3%A1!%20Sobre%20o%20app%20Boleta%3A%20">WhatsApp (11) 93295-5199</a>
+    </p>
+  </div>
+</body>
+</html>
